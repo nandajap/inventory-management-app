@@ -1,20 +1,12 @@
-import { TopNavbar } from './components/layout/TopNavbar'
+import MainLayout from './components/layout/MainLayout'
 
 function App() {
   return (
     <>
-      <div className="min-h-screen bg-gray-50">
-      <TopNavbar />
-      
-      <div className="p-8">
-        <h1 className="text-2xl font-bold text-gray-900">
-          ✅ TopNavbar is working!
-        </h1>
-        <p className="text-gray-600 mt-2">
-          You should see a white navbar at the top with logo and user info
-        </p>
-      </div>
-    </div>
+      <MainLayout>
+        <h1 className="text-2xl font-bold text-gray-800">Welcome to the Inventory Management System</h1>
+        <p className="mt-4 text-gray-600">Use the sidebar to navigate through different sections of the application.</p>
+      </MainLayout>
     </>
   )
 }
