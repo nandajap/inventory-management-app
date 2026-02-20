@@ -1,10 +1,11 @@
 import { cn } from "../../utils/cn";
 import { useState } from "react";
+import {LayoutDashboardIcon, ClipboardListIcon, ShoppingCartIcon, TruckIcon, ChartNoAxesCombinedIcon, LucideIcon} from 'lucide-react';
 
 interface NavItem {
     id: string
     label: string
-    icon: string
+    icon: LucideIcon
     active?: boolean
 }
 
@@ -12,18 +13,18 @@ const navItems: NavItem[] = [
     {
         id: 'Dashboard',
         label: 'Dashboard',
-        icon: '📊',
+        icon: LayoutDashboardIcon,
         active: false
     },
     {
         id: 'inventory',
         label: 'Inventory',
-        icon: '📦',
+        icon: ClipboardListIcon,
         active: false, 
     },
-    { id: 'orders', label: 'Orders', icon: '🛒', active: false },
-    { id: 'suppliers', label: 'Suppliers', icon: '🏢', active: false },
-    { id: 'reports', label: 'Reports', icon: '📈', active: false },
+    { id: 'orders', label: 'Orders', icon: ShoppingCartIcon, active: false },
+    { id: 'suppliers', label: 'Suppliers', icon: TruckIcon, active: false },
+    { id: 'reports', label: 'Reports', icon: ChartNoAxesCombinedIcon, active: false },
 ]
 
 export function SideNavbar() {
@@ -36,26 +37,29 @@ export function SideNavbar() {
        <aside className="w-64 bg-white border-r border-gray-200 h-full">
             <nav className="p-4">
                 <ul className="space-y-2">
-                    {navItems.map((item) => (
-                        <li key={item.id}>
-                            <button
-                                className={cn(
-                                    // Base styles (always applied)
-                                    'w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors',
-                                    'text-left text-sm font-medium',
+                    {navItems.map((item) => {
+                        const NavIcon = item.icon;
+                        return (
+                            <li key={item.id}>
+                                <button
+                                    className={cn(
+                                        // Base styles (always applied)
+                                        'w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors',
+                                        'text-left text-sm font-medium',
 
-                                    // Conditional styles (based on active state)
-                                    activeTabId === item.id
-                                        ? 'bg-blue-50 text-blue-700'          // Active state
-                                        : 'text-gray-700 hover:bg-gray-50'    // Inactive state
-                                )}
-                                onClick={()=>handleTabClick(item.id)}
-                            >
-                                <span className="text-xl">{item.icon}</span>
-                                <span >{item.label}</span>
-                            </button>
-                        </li>
-                    ))}
+                                        // Conditional styles (based on active state)
+                                        activeTabId === item.id
+                                            ? 'bg-blue-50 text-blue-700'          // Active state
+                                            : 'text-gray-700 hover:bg-gray-50'    // Inactive state
+                                    )}
+                                    onClick={()=>handleTabClick(item.id)}
+                                >
+                                    <NavIcon className="w-5 h-5"/>
+                                    <span >{item.label}</span>
+                                </button>
+                            </li>
+                        );
+                    })}
                 </ul>
             </nav>
         </aside>
