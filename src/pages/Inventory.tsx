@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchProducts } from '../lib/mockApi';
 import {Pencil, Trash2} from 'lucide-react';
+import DataTable from '../components/common/DataTable';
 
 export default function Inventory() {
     const { data, isLoading, error } = useQuery(
@@ -17,61 +18,48 @@ export default function Inventory() {
 
     return (
         <div className="p-4">
+            {/* Page Header */}
             <div className="mb-6">
                 <h1 className="text-2xl font-bold text-gray-900">Inventory Management</h1>
                 <p className="text-gray-600 mt-1">Manage your product inventory</p>
             </div>
-            <div className="bg-white rounded-lg shadow overflow-hidden">
-                <table className="min-w-full divide-y divide-gray-200">
-                    {/* Table Header */}
-                    <thead className="bg-gray-50">
-                        <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Product Name
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                SKU
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Stock Level
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Price
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Actions
-                            </th>
-                        </tr>
-                    </thead>
-
-                    {/* Table Body */}
-                    <tbody className="bg-white divide-y divide-gray-200">
-                        {/* Loading State */}
+            <DataTable>
+                <DataTable.Header>
+                    <DataTable.Column>Product Name</DataTable.Column>
+                    <DataTable.Column>SKU</DataTable.Column>
+                    <DataTable.Column>Stock Level</DataTable.Column>
+                    <DataTable.Column>Price</DataTable.Column>
+                    <DataTable.Column>Actions</DataTable.Column>
+                </DataTable.Header>
+                <DataTable.Body>
+                    {/* Loading State */}
                         {isLoading && (
-                            <tr>
-                                <td colSpan={5} className="px-6 py-12 text-center">
+                            <DataTable.Row>
+                                <DataTable.Cell colSpan={5}>
                                     <div className="flex items-center justify-center gap-2 text-gray-500">
                                         <div className="w-5 h-5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
                                         Loading products...
                                     </div>
-                                </td>
-                            </tr>
+                                </DataTable.Cell>
+                            </DataTable.Row>
                         )}
-
-                        {/* Data Rows */}
-                        {data?.map((product) => (
-                            <tr key={product.id} className="hover:bg-gray-50 transition-colors">
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="text-sm font-medium text-gray-900">
+                    
+                    {data?.map((product) => (
+                        <DataTable.Row>
+                            {/* Product Name */}
+                            <DataTable.Cell>
+                                <div className="text-sm font-medium text-gray-900">
                                         {product.name}
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
+                                </div>
+                            </DataTable.Cell>
+                            {/* SKU */}
+                            <DataTable.Cell>
                                     <div className="text-sm text-gray-500">
                                         {product.sku}
                                     </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
+                                </DataTable.Cell>
+                                {/* Stock  with Color Badge */}
+                                <DataTable.Cell>
                                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${product.stockLevel < 10
                                         ? 'bg-red-100 text-red-800'      // Low stock = red
                                         : product.stockLevel < 50
@@ -80,16 +68,18 @@ export default function Inventory() {
                                         }`}>
                                         {product.stockLevel} units
                                     </span>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
+                                </DataTable.Cell>
+                                {/* Price */}
+                                <DataTable.Cell>
                                     <div className="text-sm text-gray-900">
                                         ${product.price.toFixed(2)}
                                     </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                </DataTable.Cell>
+                                {/* Actions */}
+                                <DataTable.Cell>
                                     <button 
                                         onClick={() => console.log('Edit:', product.id)}
-                                        className="mr-4 text-gray-600 hover:text-indigo-600 font-medium transition-colors">
+                                        className="mr-4 text-gray-600 hover:text-blue-600 font-medium transition-colors">
                                         <Pencil className="w-5 h-5" />
                                     </button>
                                     <button
@@ -99,12 +89,13 @@ export default function Inventory() {
                                     </button>
                                     <img src=''>
                                     </img>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                                </DataTable.Cell>
+                        </DataTable.Row>
+                    ))}
+                </DataTable.Body>
+
+            </DataTable>
+
             </div>
-        </div>
     );
 }
