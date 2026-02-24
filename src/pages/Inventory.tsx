@@ -1,18 +1,34 @@
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchProducts } from '../lib/mockApi';
-import {Pencil, Trash2} from 'lucide-react';
+import { Pencil, Trash2 } from 'lucide-react';
 import DataTable from '../components/common/DataTable';
+import Pagination from '../components/common/Pagination';
 
 export default function Inventory() {
-    const { data, isLoading, error } = useQuery(
-        {
-            queryKey: ['products'],
-            queryFn: fetchProducts
-        });
+    // Pagination State
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+
+    //Fetch Data (Server-Side Pagination)
+    const { data, isLoading, error, isFetching } = useQuery({
+        queryKey: ['products', currentPage, pageSize], // ← Cache per page+size
+        queryFn: () => fetchProducts(currentPage, pageSize),
+        staleTime: 5 * 60 * 1000, // Cache for 5 minutes (Scenario 2)
+        placeholderData: (previousData) => previousData, // Keep old data while loading
+    });
+
+    // Handle Page Size Change
+    const handlePageSizeChange = (newSize: number) => {
+        setPageSize(newSize);
+        setCurrentPage(1); // Reset to page 1
+    };
 
     if (error) {
         return (
-            <div className="p-4 text-red-500">Error loading products: {error.message}</div>
+            <div className="p-4 text-red-500">
+                Error loading products: {error.message}
+            </div>
         );
     }
 
@@ -23,37 +39,50 @@ export default function Inventory() {
                 <h1 className="text-2xl font-bold text-gray-900">Inventory Management</h1>
                 <p className="text-gray-600 mt-1">Manage your product inventory</p>
             </div>
-            <DataTable>
-                <DataTable.Header>
-                    <DataTable.Column>Product Name</DataTable.Column>
-                    <DataTable.Column>SKU</DataTable.Column>
-                    <DataTable.Column>Stock Level</DataTable.Column>
-                    <DataTable.Column>Price</DataTable.Column>
-                    <DataTable.Column>Actions</DataTable.Column>
-                </DataTable.Header>
-                <DataTable.Body>
-                    {/* Loading State */}
+
+            {/* Table Card */}
+            <div className="bg-white rounded-lg shadow overflow-hidden">
+                {/* Loading Indicator (Background Fetches) */}
+                {isFetching && (
+                    <div className="bg-indigo-50 border-b border-indigo-100 px-4 py-2">
+                        <div className="flex items-center gap-2 text-indigo-600 text-sm">
+                            <div className="w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+                            Loading page {currentPage}...
+                        </div>
+                    </div>
+                )}
+
+                <DataTable>
+                    <DataTable.Header>
+                        <DataTable.Column>Product Name</DataTable.Column>
+                        <DataTable.Column>SKU</DataTable.Column>
+                        <DataTable.Column>Stock Level</DataTable.Column>
+                        <DataTable.Column>Price</DataTable.Column>
+                        <DataTable.Column>Actions</DataTable.Column>
+                    </DataTable.Header>
+                    <DataTable.Body>
+                        {/* Initial Loading State */}
                         {isLoading && (
                             <DataTable.Row>
                                 <DataTable.Cell colSpan={5}>
-                                    <div className="flex items-center justify-center gap-2 text-gray-500">
+                                    <div className="flex items-center justify-center gap-2 text-gray-500 py-8">
                                         <div className="w-5 h-5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
                                         Loading products...
                                     </div>
                                 </DataTable.Cell>
                             </DataTable.Row>
                         )}
-                    
-                    {data?.map((product) => (
-                        <DataTable.Row>
-                            {/* Product Name */}
-                            <DataTable.Cell>
-                                <div className="text-sm font-medium text-gray-900">
+
+                        {data?.data.map((product) => (
+                            <DataTable.Row key={product.id}>
+                                {/* Product Name */}
+                                <DataTable.Cell>
+                                    <div className="text-sm font-medium text-gray-900">
                                         {product.name}
-                                </div>
-                            </DataTable.Cell>
-                            {/* SKU */}
-                            <DataTable.Cell>
+                                    </div>
+                                </DataTable.Cell>
+                                {/* SKU */}
+                                <DataTable.Cell>
                                     <div className="text-sm text-gray-500">
                                         {product.sku}
                                     </div>
@@ -77,25 +106,35 @@ export default function Inventory() {
                                 </DataTable.Cell>
                                 {/* Actions */}
                                 <DataTable.Cell>
-                                    <button 
-                                        onClick={() => console.log('Edit:', product.id)}
+                                    <button
+                                    //Edit functionality TBA later along with add form in milestone 3
+                                        onClick={() => alert(`Edit ${product.name}`)}
                                         className="mr-4 text-gray-600 hover:text-blue-600 font-medium transition-colors">
                                         <Pencil className="w-5 h-5" />
                                     </button>
                                     <button
                                         onClick={() => console.log('Delete:', product.id)}
                                         className="text-gray-600 hover:text-red-600 font-medium transition-colors">
-                                       <Trash2 className="w-5 h-5"/>
+                                        <Trash2 className="w-5 h-5" />
                                     </button>
-                                    <img src=''>
-                                    </img>
                                 </DataTable.Cell>
-                        </DataTable.Row>
-                    ))}
-                </DataTable.Body>
+                            </DataTable.Row>
+                        ))}
+                    </DataTable.Body>
 
-            </DataTable>
+                </DataTable>
 
+                {/* Pagination Footer */}
+                {!isLoading && data && (
+                    <Pagination
+                        currentPage={currentPage}
+                        totalItems={data.pagination.totalItems}
+                        pageSize={pageSize}
+                        onPageChange={setCurrentPage}
+                        onPageSizeChange={handlePageSizeChange}
+                    />
+                )}
             </div>
+        </div>
     );
 }

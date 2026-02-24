@@ -8,24 +8,64 @@ export interface Product {
     lastUpdated: string;
 }
 
-//mock data for testing
-const mockProducts: Product[] = [
-    { id: 1, name: 'Laptop Pro 15"', sku: 'LPT-001', stockLevel: 45, price: 1299.99, category: 'Electronics', lastUpdated: '2024-01-15' },
-    { id: 2, name: 'Wireless Mouse', sku: 'MSE-002', stockLevel: 120, price: 29.99, category: 'Accessories', lastUpdated: '2024-01-14' },
-    { id: 3, name: 'USB-C Cable', sku: 'CBL-003', stockLevel: 8, price: 12.99, category: 'Accessories', lastUpdated: '2024-01-13' },
-    { id: 4, name: 'Monitor 27"', sku: 'MON-004', stockLevel: 32, price: 349.99, category: 'Electronics', lastUpdated: '2024-01-12' },
-    { id: 5, name: 'Keyboard Mechanical', sku: 'KBD-005', stockLevel: 67, price: 89.99, category: 'Accessories', lastUpdated: '2024-01-11' },
-    { id: 6, name: 'Webcam HD', sku: 'CAM-006', stockLevel: 15, price: 79.99, category: 'Electronics', lastUpdated: '2024-01-10' },
-    { id: 7, name: 'Desk Lamp LED', sku: 'LMP-007', stockLevel: 3, price: 34.99, category: 'Furniture', lastUpdated: '2024-01-09' },
-    { id: 8, name: 'Office Chair', sku: 'CHR-008', stockLevel: 22, price: 199.99, category: 'Furniture', lastUpdated: '2024-01-08' },
-];
+// Paginated Response Interface
+export interface PaginatedResponse<T> {
+    data: T[];
+    pagination: {
+        page: number;
+        pageSize: number;
+        totalItems: number;
+        totalPages: number;
+    };
+}
 
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms)); // Simulate delay
+// Generate 100 mock products (expanded from your 8)
+const MOCK_PRODUCTS: Product[] = Array.from({ length: 100 }, (_, i) => {
+    const categories = ['Electronics', 'Accessories', 'Furniture', 'Office Supplies'];
+    const names = ['Laptop', 'Mouse', 'Cable', 'Monitor', 'Keyboard', 'Webcam', 'Lamp', 'Chair'];
+
+    return {
+        id: i + 1,
+        name: `${names[i % names.length]} ${i + 1}`,
+        sku: `SKU-${String(i + 1).padStart(4, '0')}`,
+        stockLevel: Math.floor(Math.random() * 200),
+        price: parseFloat((Math.random() * 500 + 10).toFixed(2)),
+        category: categories[i % categories.length],
+        lastUpdated: new Date(2024, 0, 15 - (i % 15)).toISOString().split('T')[0],
+    };
+});
 
 // Simulate API call with delay
-export async function fetchProducts() {
-    //throw new Error('Server connection failed!'); testing error case
+export async function fetchProducts(
+    page: number = 1,
+    pageSize: number = 10
+): Promise<PaginatedResponse<Product>> {
+    // Log when function is called
+    console.log(`API Call: fetchProducts(page=${page}, pageSize=${pageSize})`);
+
     // Simulate 500-1000ms network delay
-    await delay(Math.random() * 500 + 500);
-    return [...mockProducts];
+    await new Promise((resolve) =>
+        setTimeout(resolve, Math.random() * 500 + 500)
+    );
+
+    //Uncomment to test error handling
+    //throw new Error('Server connection failed!'); 
+
+    // Calculate pagination (server-side logic)
+    const startIndex = (page - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    const paginatedData = MOCK_PRODUCTS.slice(startIndex, endIndex);
+
+    console.log(`Returning ${paginatedData.length} products (${startIndex}-${endIndex - 1})`);
+
+    // Return paginated response
+    return {
+        data: paginatedData,
+        pagination: {
+            page,
+            pageSize,
+            totalItems: MOCK_PRODUCTS.length,
+            totalPages: Math.ceil(MOCK_PRODUCTS.length / pageSize),
+        },
+    };
 }
