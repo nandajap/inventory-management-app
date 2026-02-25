@@ -19,7 +19,11 @@ export interface PaginatedResponse<T> {
     };
 }
 
-// Generate 100 mock products (expanded from your 8)
+//Sort options
+export type SortField = 'name' | 'sku' | 'stockLevel' | 'price' | 'category' | 'lastUpdated';
+export type SortOrder = 'asc' | 'desc';
+
+// Generate 100 mock products
 const MOCK_PRODUCTS: Product[] = Array.from({ length: 100 }, (_, i) => {
     const categories = ['Electronics', 'Accessories', 'Furniture', 'Office Supplies'];
     const names = ['Laptop', 'Mouse', 'Cable', 'Monitor', 'Keyboard', 'Webcam', 'Lamp', 'Chair'];
@@ -38,10 +42,12 @@ const MOCK_PRODUCTS: Product[] = Array.from({ length: 100 }, (_, i) => {
 // Simulate API call with delay
 export async function fetchProducts(
     page: number = 1,
-    pageSize: number = 10
+    pageSize: number = 10,
+    sortBy?: SortField,
+    sortOrder: SortOrder = 'asc'
 ): Promise<PaginatedResponse<Product>> {
     // Log when function is called
-    console.log(`API Call: fetchProducts(page=${page}, pageSize=${pageSize})`);
+    console.log(`API Call: fetchProducts(page=${page}, pageSize=${pageSize}), sort=${sortBy}, order=${sortOrder})`);
 
     // Simulate 500-1000ms network delay
     await new Promise((resolve) =>
@@ -51,10 +57,28 @@ export async function fetchProducts(
     //Uncomment to test error handling
     //throw new Error('Server connection failed!'); 
 
+    let sortedProducts = [...MOCK_PRODUCTS];
+    if (sortBy) {
+        sortedProducts.sort((a, b) => {
+            let comparison = 0;
+            if (sortBy === 'price' || sortBy === 'stockLevel') {
+                // Numeric comparison
+                comparison = a[sortBy] - b[sortBy];
+            } else {
+                // String comparison
+                const aValue = String(a[sortBy]).toLowerCase();
+                const bValue = String(b[sortBy]).toLowerCase();
+                comparison = aValue.localeCompare(bValue);
+            }
+            return sortOrder === 'asc' ? comparison : -comparison;
+        });
+    }
+
+
     // Calculate pagination (server-side logic)
     const startIndex = (page - 1) * pageSize;
     const endIndex = startIndex + pageSize;
-    const paginatedData = MOCK_PRODUCTS.slice(startIndex, endIndex);
+    const paginatedData = sortedProducts.slice(startIndex, endIndex);
 
     console.log(`Returning ${paginatedData.length} products (${startIndex}-${endIndex - 1})`);
 

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchProducts } from '../lib/mockApi';
-import { Pencil, Trash2 } from 'lucide-react';
+import { fetchProducts, SortField, SortOrder } from '../lib/mockApi';
+import { Pencil, Trash2, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import DataTable from '../components/common/DataTable';
 import Pagination from '../components/common/Pagination';
 
@@ -10,13 +10,43 @@ export default function Inventory() {
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
 
+    // Sort state
+    const [sortBy, setSortBy] = useState<SortField | undefined>(undefined);
+    const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
+
+
     //Fetch Data (Server-Side Pagination)
     const { data, isLoading, error, isFetching } = useQuery({
-        queryKey: ['products', currentPage, pageSize], // ← Cache per page+size
-        queryFn: () => fetchProducts(currentPage, pageSize),
+        queryKey: ['products', currentPage, pageSize, sortBy, sortOrder], // ← Cache per page+size+sort
+        queryFn: () => fetchProducts(currentPage, pageSize, sortBy, sortOrder),
         staleTime: 5 * 60 * 1000, // Cache for 5 minutes (Scenario 2)
         placeholderData: (previousData) => previousData, // Keep old data while loading
     });
+
+    const handleSort = (field: SortField) => {
+        console.log(`Handle Sort click!! field: ${field} sortBy: ${sortBy}`);
+        if (sortBy === field) {
+            setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+        } else {
+            setSortBy(field);
+            setSortOrder('asc');
+        }
+        // Reset to first page when sorting changes
+        setCurrentPage(1);
+    };
+
+    const getSortIcon = (field: SortField) => {
+        if (sortBy !== field) {
+            return <ArrowUpDown className="w-4 h-4 opacity-50" />
+        }
+
+        return sortOrder === 'asc' ? (
+            <ArrowUp className="w-4 h-4 text-indigo-600" />
+        ) : (
+            <ArrowDown className="w-4 h-4 text-indigo-600" />
+        );
+
+    }
 
     // Handle Page Size Change
     const handlePageSizeChange = (newSize: number) => {
@@ -54,10 +84,30 @@ export default function Inventory() {
 
                 <DataTable>
                     <DataTable.Header>
-                        <DataTable.Column>Product Name</DataTable.Column>
-                        <DataTable.Column>SKU</DataTable.Column>
-                        <DataTable.Column>Stock Level</DataTable.Column>
-                        <DataTable.Column>Price</DataTable.Column>
+                        <DataTable.Column onClick={() => handleSort('name')} className="cursor-pointer hover:bg-gray-100 transition-colors" >
+                            <div className="flex items-center gap-2">
+                                Product Name
+                                {getSortIcon('name')}
+                            </div>
+                        </DataTable.Column>
+                        <DataTable.Column onClick={() => handleSort('sku')} className="cursor-pointer hover:bg-gray-100 transition-colors" >
+                            <div className="flex items-center gap-2">
+                                SKU
+                                {getSortIcon('sku')}
+                            </div>
+                        </DataTable.Column>
+                        <DataTable.Column onClick={() => handleSort('stockLevel')} className="cursor-pointer hover:bg-gray-100 transition-colors" >
+                            <div className="flex items-center gap-2">
+                                Stock Level
+                                {getSortIcon('stockLevel')}
+                            </div>
+                        </DataTable.Column>
+                        <DataTable.Column onClick={() => handleSort('price')} className="cursor-pointer hover:bg-gray-100 transition-colors">
+                            <div className="flex items-center gap-2">
+                                Price
+                                {getSortIcon('price')}
+                            </div>
+                        </DataTable.Column>
                         <DataTable.Column>Actions</DataTable.Column>
                     </DataTable.Header>
                     <DataTable.Body>
@@ -107,7 +157,7 @@ export default function Inventory() {
                                 {/* Actions */}
                                 <DataTable.Cell>
                                     <button
-                                    //Edit functionality TBA later along with add form in milestone 3
+                                        //Edit functionality TBA later along with add form in milestone 3
                                         onClick={() => alert(`Edit ${product.name}`)}
                                         className="mr-4 text-gray-600 hover:text-blue-600 font-medium transition-colors">
                                         <Pencil className="w-5 h-5" />
