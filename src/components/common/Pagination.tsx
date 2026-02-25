@@ -26,7 +26,7 @@ export default function Pagination({
     const isLastPage = currentPage === totalPages;
 
     return (
-        <div className="flex items-center justify-between px-6 py-4 bg-white border-t border-gray-200">
+        <div className="flex items-center justify-between shrink-0 px-6 py-4 bg-white border-t border-gray-200">
             {/* Left: Page Size Selector */}
             <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-700">Show</span>
