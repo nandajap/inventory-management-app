@@ -1,23 +1,4 @@
-export interface Product {
-    id: number;
-    name: string;
-    sku: string;
-    stockLevel: number;
-    price: number;
-    category: string;
-    lastUpdated: string;
-}
-
-// Paginated Response Interface
-export interface PaginatedResponse<T> {
-    data: T[];
-    pagination: {
-        page: number;
-        pageSize: number;
-        totalItems: number;
-        totalPages: number;
-    };
-}
+import { Product, PaginatedResponse } from '../types/inventory';
 
 //Sort options
 export type SortField = 'name' | 'sku' | 'stockLevel' | 'price' | 'category' | 'lastUpdated';
@@ -92,4 +73,16 @@ export async function fetchProducts(
             totalPages: Math.ceil(MOCK_PRODUCTS.length / pageSize),
         },
     };
+}
+
+export async function deleteProduct(id: number): Promise<void> {
+    await new Promise((resolve) =>
+        setTimeout(resolve, Math.random() * 500 + 500)
+    );
+
+    const itemIndex = MOCK_PRODUCTS.findIndex(product => product.id === id);
+    if (itemIndex === -1) {
+        throw new Error(`Product with id ${id} not found`);
+    }
+    MOCK_PRODUCTS.splice(itemIndex, 1);
 }

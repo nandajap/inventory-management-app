@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { fetchProducts, SortField, SortOrder } from '../lib/mockApi';
-import { Pencil, Trash2, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { fetchProducts, SortField, SortOrder, deleteProduct } from '../lib/mockApi';
+import { Product } from '../types/inventory';
+import { Pencil, Trash2, ArrowUpDown, ArrowUp, ArrowDown, Package } from 'lucide-react';
 import DataTable from '../components/common/DataTable';
 import Pagination from '../components/common/Pagination';
 
 export default function Inventory() {
+    const queryClient = useQueryClient();
     // Pagination State
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
@@ -19,7 +21,7 @@ export default function Inventory() {
     const { data, isLoading, error, isFetching } = useQuery({
         queryKey: ['products', currentPage, pageSize, sortBy, sortOrder], // ← Cache per page+size+sort
         queryFn: () => fetchProducts(currentPage, pageSize, sortBy, sortOrder),
-        staleTime: 5 * 60 * 1000, // Cache for 5 minutes (Scenario 2)
+        staleTime: 5 * 60 * 1000, // Cache for 5 minutes
         placeholderData: (previousData) => previousData, // Keep old data while loading
     });
 
@@ -45,7 +47,6 @@ export default function Inventory() {
         ) : (
             <ArrowDown className="w-4 h-4 text-indigo-600" />
         );
-
     }
 
     // Handle Page Size Change
@@ -53,6 +54,29 @@ export default function Inventory() {
         setPageSize(newSize);
         setCurrentPage(1); // Reset to page 1
     };
+
+    const handleEdit = (product: Product) => {
+        console.log('Edit product:', product);
+        // TODO: Will be implemented in Week 3 with modal
+        alert(`Edit: ${product.name}`);
+    };
+
+    const handleDelete = async (product: Product) => {
+        const confirmed = window.confirm(
+            `Are you sure you want to delete "${product.name}"?`
+        );
+        if (!confirmed) return;
+
+        try {
+            await deleteProduct(product.id);
+            // Invalidate and refetch the products
+            queryClient.invalidateQueries({ queryKey: ['products'] });
+        } catch (error) {
+            console.error('Delete failed:', error);
+            alert('Failed to delete product. Please try again.');
+        }
+
+    }
 
     if (error) {
         return (
@@ -122,6 +146,14 @@ export default function Inventory() {
                                 </DataTable.Cell>
                             </DataTable.Row>
                         )}
+                        {data?.data.length === 0 && !isLoading && (
+                            <DataTable.Cell colSpan={5}>
+                                <div className="text-center py-12 text-lg text-gray-500">
+                                    <Package className="w-20 h-20 mx-auto mb-4" />
+                                    <p>No products found</p>
+                                </div>
+                            </DataTable.Cell>
+                        )}
 
                         {data?.data.map((product) => (
                             <DataTable.Row key={product.id}>
@@ -158,12 +190,12 @@ export default function Inventory() {
                                 <DataTable.Cell>
                                     <button
                                         //Edit functionality TBA later along with add form in milestone 3
-                                        onClick={() => alert(`Edit ${product.name}`)}
+                                        onClick={() => handleEdit(product)}
                                         className="mr-4 text-gray-600 hover:text-blue-600 font-medium transition-colors">
                                         <Pencil className="w-5 h-5" />
                                     </button>
                                     <button
-                                        onClick={() => console.log('Delete:', product.id)}
+                                        onClick={() => handleDelete(product)}
                                         className="text-gray-600 hover:text-red-600 font-medium transition-colors">
                                         <Trash2 className="w-5 h-5" />
                                     </button>
