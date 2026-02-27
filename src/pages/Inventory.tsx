@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { fetchProducts, SortField, SortOrder, deleteProduct } from '../lib/mockApi';
+import { fetchProducts, SortField, SortOrder, deleteProduct } from '../services/mockApi';
 import { Product } from '../types/inventory';
 import { Pencil, Trash2, ArrowUpDown, ArrowUp, ArrowDown, Package } from 'lucide-react';
 import DataTable from '../components/common/DataTable';
