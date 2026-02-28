@@ -1,16 +1,34 @@
 import React, { useState } from 'react';
 import * as Label from '@radix-ui/react-label';
 import { useAuth } from '../hooks/useAuth';
+import { Navigate } from 'react-router-dom';
 
 export const Login: React.FC = () => {
-    const { login } = useAuth();
+    const { login, isAuthenticated, isLoading } = useAuth();
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleSubmit = async (e: React.SubmitEvent) => {
+    // Still initializing auth state
+    if (isLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50">
+                <div className="text-center">
+                    <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
+                    <p className="mt-4 text-sm text-gray-600">Loading...</p>
+                </div>
+            </div>
+        );
+    }
+
+    // Already authenticated - redirect away
+    if (isAuthenticated) {
+        return <Navigate to="/inventory" replace />;
+    }
+
+    const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
         e.preventDefault();
         setError('');
         setIsSubmitting(true);

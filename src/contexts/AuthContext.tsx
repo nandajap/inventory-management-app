@@ -4,6 +4,7 @@ import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import { User, AuthContextType } from '../types/auth';
 import { mockLogin, mockLogout, mockRefreshToken } from '../services/mockAuth';
 import { useMutation } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 
 // Create the context (initially undefined)
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -20,6 +21,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [user, setUser] = useState<User | null>(null);
     const [isInitializing, setIsInitializing] = useState(true); // true during initial check
 
+    const navigate = useNavigate();
     const isAuthenticated = !!user;
 
     // LOGIN MUTATION
@@ -30,6 +32,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, tokens.accessToken);
             localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, tokens.refreshToken);
             localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
+            navigate('/inventory', {replace:true});
         }
     });
 
@@ -40,6 +43,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
             localStorage.removeItem(STORAGE_KEYS.USER);
             localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
+            navigate('/login', {replace:true});
         }
     })
 
