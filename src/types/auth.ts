@@ -13,7 +13,7 @@ export interface AuthTokens {
 
 export interface AuthContextType {
     user: User | null;              // null = not logged in
-    login: (email: string, password: string) => Promise<void>;
+    login: (email: string, password: string) => Promise<User>;
     logout: () => void;
     isAuthenticated: boolean;
     isLoading: boolean; // Only true during initial session restore
@@ -22,4 +22,15 @@ export interface AuthContextType {
 export interface LoginCredentials{
     email:string;
     password:string;
+}
+
+export interface LoginResponse {
+    user: User;
+    accessToken: string;
+    refreshToken: string;
+}
+
+export interface RefreshResponse {
+    accessToken: string;
+    refreshToken: string
 }

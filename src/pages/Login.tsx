@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import * as Label from '@radix-ui/react-label';
 import { useAuth } from '../hooks/useAuth';
 import { Navigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+
 
 export const Login: React.FC = () => {
     const { login, isAuthenticated, isLoading } = useAuth();
@@ -10,6 +12,7 @@ export const Login: React.FC = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const navigate = useNavigate();
 
     // Still initializing auth state
     if (isLoading) {
@@ -35,8 +38,9 @@ export const Login: React.FC = () => {
 
         try {
             await login(email, password);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Invalid email or password');
+            navigate('/inventory', { replace: true });
+        } catch (err: any) {
+            setError(err.response?.data?.message|| 'Invalid email or password');
         } finally {
             setIsSubmitting(false);
         }
@@ -49,10 +53,10 @@ export const Login: React.FC = () => {
                     <h2 className="text-2xl sm:text-3xl  font-bold text-center">Sign In</h2>
                     <div className="mt-2 space-y-1">
                         <p className="text-center text-xs sm:text-sm text-gray-600">
-                            Admin: admin@test.com / admin123
+                            Admin: admin@example.com / admin123
                         </p>
                         <p className="text-center text-xs sm:text-sm text-gray-600">
-                            Viewer: viewer@test.com / viewer123
+                            Viewer: viewer@example.com / viewer123
                         </p>
                     </div>
                 </div>

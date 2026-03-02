@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { fetchProducts, SortField, SortOrder, deleteProduct } from '../services/mockApi';
+import { SortField, SortOrder } from '../mocks/handlers/products.handlers';
 import { Product } from '../types/inventory';
 import { Pencil, Trash2, ArrowUpDown, ArrowUp, ArrowDown, Package } from 'lucide-react';
 import DataTable from '../components/common/DataTable';
 import Pagination from '../components/common/Pagination';
+import { productService } from '../services/productService';
 
 export default function Inventory() {
     const queryClient = useQueryClient();
@@ -20,7 +21,7 @@ export default function Inventory() {
     //Fetch Data (Server-Side Pagination)
     const { data, isLoading, error, isFetching } = useQuery({
         queryKey: ['products', currentPage, pageSize, sortBy, sortOrder], // ← Cache per page+size+sort
-        queryFn: () => fetchProducts(currentPage, pageSize, sortBy, sortOrder),
+        queryFn: () => productService.fetchProducts(currentPage, pageSize, sortBy, sortOrder),
         staleTime: 5 * 60 * 1000, // Cache for 5 minutes
         placeholderData: (previousData) => previousData, // Keep old data while loading
     });
@@ -68,7 +69,7 @@ export default function Inventory() {
         if (!confirmed) return;
 
         try {
-            await deleteProduct(product.id);
+            await productService.delete(product.id);
             // Invalidate and refetch the products
             queryClient.invalidateQueries({ queryKey: ['products'] });
         } catch (error) {

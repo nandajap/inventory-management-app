@@ -8,9 +8,12 @@
 import { useAuth } from '../../hooks/useAuth'
 import logoImage from '../../assets/images/logo.jpg'
 import { LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export function TopNavbar() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
 
   const handleLogout = () => {
     const confirmed = window.confirm(
@@ -18,6 +21,8 @@ export function TopNavbar() {
     );
     if (!confirmed) return;
     logout();
+    navigate(`/login`, {replace:true})
+
   }
 
   return (

@@ -29,7 +29,7 @@ function App() {
             <Route path="reports" element={<Navigate to="/inventory" replace />} />
 
           </Route>
-          <Route path="*" element={<Navigate to="/inventory" replace />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
 
         </Routes>
       </AuthProvider>
