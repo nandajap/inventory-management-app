@@ -6,6 +6,8 @@ import { Pencil, Trash2, ArrowUpDown, ArrowUp, ArrowDown, Package } from 'lucide
 import DataTable from '../components/common/DataTable';
 import Pagination from '../components/common/Pagination';
 import { productService } from '../services/productService';
+import PermissionGuard from '../components/auth/PermissionGuard';
+import { usePermissions } from '../hooks/usePermissions';
 
 export default function Inventory() {
     const queryClient = useQueryClient();
@@ -16,6 +18,9 @@ export default function Inventory() {
     // Sort state
     const [sortBy, setSortBy] = useState<SortField | undefined>(undefined);
     const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
+
+    const { can } = usePermissions();
+    const hasAnyActions = can('product.edit') || can('product.delete');
 
 
     //Fetch Data (Server-Side Pagination)
@@ -133,7 +138,9 @@ export default function Inventory() {
                                 {getSortIcon('price')}
                             </div>
                         </DataTable.Column>
-                        <DataTable.Column>Actions</DataTable.Column>
+                        {hasAnyActions &&
+                            <DataTable.Column>Actions</DataTable.Column>
+                        }
                     </DataTable.Header>
                     <DataTable.Body>
                         {/* Initial Loading State */}
@@ -188,23 +195,30 @@ export default function Inventory() {
                                     </div>
                                 </DataTable.Cell>
                                 {/* Actions */}
-                                <DataTable.Cell>
-                                    <button
-                                        //Edit functionality TBA later along with add form in milestone 3
-                                        onClick={() => handleEdit(product)}
-                                        className="mr-4 text-gray-600 hover:text-blue-600 font-medium transition-colors">
-                                        <Pencil className="w-5 h-5" />
-                                    </button>
-                                    <button
-                                        onClick={() => handleDelete(product)}
-                                        className="text-gray-600 hover:text-red-600 font-medium transition-colors">
-                                        <Trash2 className="w-5 h-5" />
-                                    </button>
-                                </DataTable.Cell>
+                                {hasAnyActions &&
+                                    <DataTable.Cell>
+                                        {/* Edit button - Admin only */}
+                                        <PermissionGuard permission='product.edit'>
+                                            <button
+                                                //Edit functionality TBA later along with add form in milestone 3
+                                                onClick={() => handleEdit(product)}
+                                                className="mr-4 text-gray-600 hover:text-blue-600 font-medium transition-colors">
+                                                <Pencil className="w-5 h-5" />
+                                            </button>
+                                        </PermissionGuard>
+                                        {/* Delete button - Admin only */}
+                                        <PermissionGuard permission='product.delete'>
+                                            <button
+                                                onClick={() => handleDelete(product)}
+                                                className="text-gray-600 hover:text-red-600 font-medium transition-colors">
+                                                <Trash2 className="w-5 h-5" />
+                                            </button>
+                                        </PermissionGuard>
+                                    </DataTable.Cell>
+                                }
                             </DataTable.Row>
                         ))}
                     </DataTable.Body>
-
                 </DataTable>
 
                 {/* Pagination Footer */}

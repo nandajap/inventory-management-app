@@ -27,7 +27,6 @@ function App() {
             <Route path="orders" element={<Navigate to="/inventory" replace />} />
             <Route path="suppliers" element={<Navigate to="/inventory" replace />} />
             <Route path="reports" element={<Navigate to="/inventory" replace />} />
-
           </Route>
           <Route path="*" element={<Navigate to="/login" replace />} />
 

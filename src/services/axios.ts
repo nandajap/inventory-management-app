@@ -33,9 +33,6 @@ const processQueue = (error: AxiosError | null, token: string | null = null) => 
 
 
 // Request interceptor (adds auth token to every request) 
-
-// ---REMOVE::Before every API request, checks localStorage for accessToken .If found, adds it to the Authorization header. 
-// This way you don't manually add Bearer ${token} in every API call
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
@@ -131,6 +128,8 @@ const handleLogout = () => {
   localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
   localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
   localStorage.removeItem(STORAGE_KEYS.USER);
+  // Trigger logout event for other tabs
+  localStorage.setItem(STORAGE_KEYS.LOGOUT_EVENT, Date.now().toString());
 
   // Redirect to login page
   window.location.href = '/login';

@@ -9,7 +9,7 @@ const MOCK_USERS: Record<string, { password: string; user: User }> = {
         user: {
             id: '1',
             email: 'admin@example.com',
-            name: 'Admin User',
+            name: 'Kyle Henry',
             role: 'Admin'
         }
     },
@@ -18,8 +18,17 @@ const MOCK_USERS: Record<string, { password: string; user: User }> = {
         user: {
             id: '2',
             email: 'viewer@example.com',
-            name: 'Viewer User',
+            name: 'Jen Cooper',
             role: 'Viewer'
+        }
+    },
+    'john@example.com': {
+        password: 'admin321',
+        user: {
+            id: '3',
+            email: 'john@example.com',
+            name: 'John Samuel',
+            role: 'Admin'
         }
     }
 };
@@ -87,30 +96,30 @@ export const authHandlers = [
     }),
 
     // Get current user
-  http.get(`${BASE_URL}/auth/me`, ({ request }) => {
-    const authHeader = request.headers.get('Authorization');
+//   http.get(`${BASE_URL}/auth/me`, ({ request }) => {
+//     const authHeader = request.headers.get('Authorization');
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return HttpResponse.json(
-        { message: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
+//     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+//       return HttpResponse.json(
+//         { message: 'Unauthorized' },
+//         { status: 401 }
+//       );
+//     }
 
-    const token = authHeader.replace('Bearer ', '');
-    const userId = token.split('-')[2];
+//     const token = authHeader.replace('Bearer ', '');
+//     const userId = token.split('-')[2];
 
-    const user = Object.values(MOCK_USERS).find(u => u.user.id === userId);
+//     const user = Object.values(MOCK_USERS).find(u => u.user.id === userId);
 
-    if (!user) {
-      return HttpResponse.json(
-        { message: 'User not found' },
-        { status: 404 }
-      );
-    }
+//     if (!user) {
+//       return HttpResponse.json(
+//         { message: 'User not found' },
+//         { status: 404 }
+//       );
+//     }
 
-    return HttpResponse.json(user.user);
-  }),
+//     return HttpResponse.json(user.user);
+//   }),
 
 
 ];

@@ -32,10 +32,8 @@ export const productsHandlers = [
         if (!authResult.success) {
             return authResult.response;  // Return 401 if invalid/expired
         }
-
-        console.log('✅ MSW: Valid token, processing request');
-
-
+        
+        console.log('MSW: Valid token, processing request');
         await new Promise(resolve => setTimeout(resolve, 800));
         const url = new URL(request.url);
         const page = parseInt(url.searchParams.get('page') || '1');

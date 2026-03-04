@@ -21,8 +21,7 @@ export function TopNavbar() {
     );
     if (!confirmed) return;
     logout();
-    navigate(`/login`, {replace:true})
-
+    navigate(`/login`, { replace: true })
   }
 
   return (
@@ -46,25 +45,30 @@ export function TopNavbar() {
 
           {/* RIGHT: User Info */}
           {user &&
-            (            
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    {/* User Avatar */}
-                    <img
-                      src="https://i.pravatar.cc/40"
-                      alt="User Avatar"
-                      className="w-8 h-8 rounded-full"
-                    />
+            (
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  {/* User Avatar */}
+                  <img
+                    src="https://i.pravatar.cc/40"
+                    alt="User Avatar"
+                    className="w-8 h-8 rounded-full"
+                  />
+                  <div className='flex flex-col'>
                     {/* User Name */}
-                    <span className="text-sm font-normal text-gray-700">{user.name}</span>
+                    <span className="text-sm font-semibold text-gray-700">{user.name}</span>
+                    <span className="text-sm font-normal text-gray-600">{user.role}</span>
+
                   </div>
-                  <button
-                    onClick={handleLogout}
-                    className="flex flex-row items-center lg:text-base sm:text-xs text-gray-600 hover:text-red-400 transition-colors"
-                  >
-                    <LogOut className="mx-2 w-5 h-5" /> Logout
-                  </button>
+
                 </div>
+                <button
+                  onClick={handleLogout}
+                  className="flex flex-row items-center lg:text-base sm:text-xs text-gray-600 hover:text-red-400 transition-colors"
+                >
+                  <LogOut className="mx-2 w-5 h-5" /> Logout
+                </button>
+              </div>
             )
           }
         </div>

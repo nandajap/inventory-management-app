@@ -2,9 +2,10 @@ export interface User {
     id: string;
     email: string;
     name: string;
-    role: 'Admin' | 'Viewer';
-
+    role: UserRole;
 }
+
+export type UserRole = 'Admin' | 'Viewer';
 
 export interface AuthTokens {
     refreshToken: string;
@@ -13,6 +14,7 @@ export interface AuthTokens {
 
 export interface AuthContextType {
     user: User | null;              // null = not logged in
+    role: UserRole|null;
     login: (email: string, password: string) => Promise<User>;
     logout: () => void;
     isAuthenticated: boolean;

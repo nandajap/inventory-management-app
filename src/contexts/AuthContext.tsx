@@ -23,7 +23,37 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
 
         setIsInitializing(false);
-    }, []);
+    }, []); // Empty dependency array = runs ONCE on mount
+
+    //Listen for cross-tab auth changes
+    useEffect(() => {
+        const handleStorageChange = (e: StorageEvent) => {
+            // Logout event from another tab
+            if (e.key === STORAGE_KEYS.LOGOUT_EVENT && e.newValue) {
+                console.log('Logout detected from another tab');
+                clearAuthState();
+            }
+
+            // Token was removed (session expiry or manual clear)
+            if (e.key === STORAGE_KEYS.ACCESS_TOKEN && !e.newValue && e.oldValue) {
+                console.log('Token removed - logging out');
+                clearAuthState();
+            }
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+        };
+    }, []); // Runs once, sets up listener
+
+    const clearAuthState = () => {
+        setUser(null);
+        localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
+        localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+        localStorage.removeItem(STORAGE_KEYS.USER);
+    };
 
     // LOGIN FUNCTION: Called from Login page
     const login = async (email: string, password: string) => {
@@ -50,15 +80,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         } catch (error) {
             console.error('Logout error:', error);
         } finally {
-            setUser(null);
-            localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
-            localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
-            localStorage.removeItem(STORAGE_KEYS.USER);
+            clearAuthState();
+            // Set logout event for other tabs to detect
+            localStorage.setItem(STORAGE_KEYS.LOGOUT_EVENT, Date.now().toString());
+
         }
     };
 
     const value: AuthContextType = {
         user,
+        role: user?.role || null,
         login,
         logout,
         isAuthenticated,
