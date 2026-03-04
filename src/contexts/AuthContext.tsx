@@ -33,12 +33,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 console.log('Logout detected from another tab');
                 clearAuthState();
             }
-
-            // Token was removed (session expiry or manual clear)
-            if (e.key === STORAGE_KEYS.ACCESS_TOKEN && !e.newValue && e.oldValue) {
-                console.log('Token removed - logging out');
-                clearAuthState();
-            }
         };
 
         window.addEventListener('storage', handleStorageChange);
