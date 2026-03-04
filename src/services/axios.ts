@@ -6,7 +6,7 @@ const BASE_URL = "https://api.inventoryapp.com"; //mock base url
 // Create Axios instance with base configuration
 export const apiClient = axios.create({
   baseURL: BASE_URL,
-  timeout: 10000,
+  timeout: 5000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -53,10 +53,10 @@ apiClient.interceptors.response.use(
     };
 
     // Skip token refresh logic for auth endpoints (login, refresh)
-    const isAuthEndpoint = originalRequest.url?.includes('/auth/login') || 
-                          originalRequest.url?.includes('/auth/refresh');
+    const isAuthEndpoint = originalRequest.url?.includes('/auth/login') ||
+      originalRequest.url?.includes('/auth/refresh');
     // If error is 401 and we haven't retried yet
-    if (error.response?.status === 401 && !originalRequest._retry&& !isAuthEndpoint) {
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
       // If already refreshing, queue this request
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
@@ -109,6 +109,15 @@ apiClient.interceptors.response.use(
         // Retry original request
         return apiClient(originalRequest);
       } catch (refreshError) {
+        //Check if it's a 401 (expired refresh token) or timeout
+        const error = refreshError as AxiosError;
+        if (error.response?.status === 401) {
+          console.log('Refresh token expired, logging out...');
+        } else if (error.code === 'ECONNABORTED') {
+          console.log('Refresh request timed out');
+        } else {
+          console.log('Network error during refresh');
+        }
         // Refresh failed - logout user
         processQueue(refreshError as AxiosError, null);
         handleLogout();

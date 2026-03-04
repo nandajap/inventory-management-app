@@ -1,5 +1,6 @@
 import { User, AuthTokens } from "../../types/auth";
 import { http, HttpResponse } from 'msw';
+import { isTokenExpired } from "../../utils/tokenValidation";
 
 const BASE_URL = 'https://api.inventoryapp.com';
 
@@ -45,7 +46,7 @@ export const authHandlers = [
     http.post(`${BASE_URL}/auth/login`, async ({ request }) => {
         await new Promise(resolve => setTimeout(resolve, 800));
 
-        console.log("🔍 MSW: POST /auth/login called");
+        console.log("MSW: POST /auth/login called");
 
         const { email, password } = await request.json() as { email: string; password: string };
         const userRecord = MOCK_USERS[email];
@@ -57,7 +58,7 @@ export const authHandlers = [
         }
         const tokens = generateTokens(userRecord.user.id);
 
-        console.log("✅ MSW: Login successful, token :"+ tokens);
+        console.log("MSW: Login successful, token :" + tokens);
 
         return HttpResponse.json({
             user: userRecord.user,
@@ -71,16 +72,24 @@ export const authHandlers = [
         await new Promise(resolve => setTimeout(resolve, 500));
 
         const { refreshToken } = await request.json() as { refreshToken: string };
+        
+        //Check if refresh token is expired
+        if (isTokenExpired(refreshToken)) {
+            return HttpResponse.json(
+                { message: 'Refresh token expired' },
+                { status: 401 }
+            );
+        }
+
         // Extract user ID from refresh token 
         const userId = refreshToken.split('-')[2];
-
         if (!userId) {
             return HttpResponse.json(
                 { message: 'Invalid refresh token' },
                 { status: 401 }
             );
         }
-
+        console.log('MSW: Refresh token valid, generating new tokens');
         const tokens = generateTokens(userId);
 
         return HttpResponse.json({
@@ -94,32 +103,4 @@ export const authHandlers = [
         await new Promise(resolve => setTimeout(resolve, 300));
         return HttpResponse.json({ message: 'Logged out successfully' });
     }),
-
-    // Get current user
-//   http.get(`${BASE_URL}/auth/me`, ({ request }) => {
-//     const authHeader = request.headers.get('Authorization');
-
-//     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-//       return HttpResponse.json(
-//         { message: 'Unauthorized' },
-//         { status: 401 }
-//       );
-//     }
-
-//     const token = authHeader.replace('Bearer ', '');
-//     const userId = token.split('-')[2];
-
-//     const user = Object.values(MOCK_USERS).find(u => u.user.id === userId);
-
-//     if (!user) {
-//       return HttpResponse.json(
-//         { message: 'User not found' },
-//         { status: 404 }
-//       );
-//     }
-
-//     return HttpResponse.json(user.user);
-//   }),
-
-
 ];

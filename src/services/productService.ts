@@ -11,7 +11,6 @@ export const productService = {
         sortBy?: SortField,
         sortOrder: SortOrder = 'asc'): Promise<PaginatedResponse<Product>> => {
         const response = await apiClient.get<PaginatedResponse<Product>>(`${baseURL}`, { params: { page, pageSize, sortBy, sortOrder } });
-
         return response.data
     },
 

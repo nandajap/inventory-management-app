@@ -16,16 +16,18 @@ export const isTokenExpired = (token: string): boolean => {
     const timestamp = parseInt(parts[parts.length - 1]);
     
     if (!timestamp || isNaN(timestamp)) {
-        console.log('⚠️ MSW: No timestamp in token');
+        console.log('MSW: No timestamp in token');
         return false;
     }
     
-    // Token expires after 15 minutes (900000ms)
-    const expirationTime = 15 * 60 * 1000;
+    const isAccessToken = token.startsWith('access-token');
+    const expirationTime = isAccessToken 
+        ? 15 * 60 * 1000       // Access: 15 minutes
+        : 7 * 24 * 60 * 60 * 1000; // Refresh: 7 days
     const tokenAge = Date.now() - timestamp;
     const isExpired = tokenAge > expirationTime;
     
-    console.log(`🕐 MSW: Token age: ${Math.floor(tokenAge / 1000)}s, Expired: ${isExpired}`);
+    console.log(`MSW: Token age: ${Math.floor(tokenAge / 1000)}s, Expired: ${isExpired}`);
     
     return isExpired;
 };
@@ -39,9 +41,7 @@ export const validateAuthToken = (request: Request):
     { success: false; response: Response } =>
 {
     const authHeader = request.headers.get('Authorization');
-    
-    console.log('🔍 MSW: Authorization header:', authHeader);
-    
+        
     // Check if header exists and has correct format
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         console.log('MSW: No valid auth header');

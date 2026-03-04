@@ -30,47 +30,44 @@ export function TopNavbar() {
         <div className="flex justify-between items-center h-16">
 
           {/* LEFT: Logo and Title */}
-          <div className="flex items-center gap-3">
-            {/* Logo */}
+          <div className="flex items-center gap-2 sm:gap-3">
             <img
               src={logoImage}
               alt="Logo"
-              className="w-8 h-8 object-cover"
+              className="w-8 h-8 object-cover flex-shrink-0" 
             />
-            {/* Title */}
-            <h1 className="lg:text-xl sm:text-xs font-semibold text-gray-900">
-              Inventory Management
+            <h1 className="text-sm sm:text-base lg:text-xl font-semibold text-gray-900 truncate">
+              <span className="hidden sm:inline">Inventory Management</span>
+              <span className="sm:hidden">Inventory</span> 
             </h1>
           </div>
 
           {/* RIGHT: User Info */}
-          {user &&
-            (
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  {/* User Avatar */}
-                  <img
-                    src="https://i.pravatar.cc/40"
-                    alt="User Avatar"
-                    className="w-8 h-8 rounded-full"
-                  />
-                  <div className='flex flex-col'>
-                    {/* User Name */}
-                    <span className="text-sm font-semibold text-gray-700">{user.name}</span>
-                    <span className="text-sm font-normal text-gray-600">{user.role}</span>
-
-                  </div>
-
+          {user && (
+            <div className="flex items-center gap-2 sm:gap-4">
+              <div className="md:flex items-center gap-2">
+                {/* User Avatar */}
+                <img
+                  src="https://i.pravatar.cc/40"
+                  alt="User Avatar"
+                  className="hidden md:block w-8 h-8 rounded-full"
+                />
+                <div className='flex flex-col'>
+                  {/* User Name */}
+                  <span className="text-sm font-semibold text-gray-700">{user.name}</span>
+                  <span className="text-xs text-gray-600">{user.role}</span>
                 </div>
-                <button
-                  onClick={handleLogout}
-                  className="flex flex-row items-center lg:text-base sm:text-xs text-gray-600 hover:text-red-400 transition-colors"
-                >
-                  <LogOut className="mx-2 w-5 h-5" /> Logout
-                </button>
               </div>
-            )
-          }
+
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm lg:text-base text-gray-600 hover:text-red-400 transition-colors"
+              >
+                <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="hidden sm:inline">Logout</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </header>

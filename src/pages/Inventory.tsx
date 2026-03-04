@@ -32,7 +32,6 @@ export default function Inventory() {
     });
 
     const handleSort = (field: SortField) => {
-        console.log(`Handle Sort click!! field: ${field} sortBy: ${sortBy}`);
         if (sortBy === field) {
             setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
         } else {

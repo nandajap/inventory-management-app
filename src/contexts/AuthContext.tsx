@@ -23,7 +23,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
 
         setIsInitializing(false);
-    }, []); // Empty dependency array = runs ONCE on mount
+    }, []); // Runs once on mount
 
     //Listen for cross-tab auth changes
     useEffect(() => {

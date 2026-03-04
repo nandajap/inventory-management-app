@@ -1,6 +1,5 @@
 import { hasPermission, Permission } from '../utils/permission';
 import { useAuth } from './useAuth';
-import { useMemo } from 'react';
 
 export function usePermissions() {
   const {role} = useAuth();
@@ -9,8 +8,8 @@ export function usePermissions() {
     return hasPermission(permission, role);
   };
 
-  const isAdmin = useMemo(()=> role === 'Admin', [role]);
-  const isViewer = useMemo(() => role === 'Viewer', [role]);
+  const isAdmin = role === 'Admin';
+  const isViewer = role === 'Viewer';
 
   return {
     role,
