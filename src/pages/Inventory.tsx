@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { SortField, SortOrder } from '../mocks/handlers/products.handlers';
 import { Product } from '../types/inventory';
-import { Pencil, Trash2, ArrowUpDown, ArrowUp, ArrowDown, Package } from 'lucide-react';
+import { Pencil, Trash2, ArrowUpDown, ArrowUp, ArrowDown, Package, Plus } from 'lucide-react';
 import DataTable from '../components/common/DataTable';
 import Pagination from '../components/common/Pagination';
 import { productService } from '../services/productService';
 import PermissionGuard from '../components/auth/PermissionGuard';
 import { usePermissions } from '../hooks/usePermissions';
+import { Button } from '@/components/ui/button';
 
 export default function Inventory() {
     const queryClient = useQueryClient();
@@ -94,10 +95,16 @@ export default function Inventory() {
     return (
         <div className="p-4">
             {/* Page Header */}
+            <div className="mb-6 flex items-center justify-between">
             <div className="mb-6">
                 <h1 className="text-2xl font-bold text-gray-900">Inventory Management</h1>
                 <p className="text-gray-600 mt-1">Manage your product inventory</p>
             </div>
+
+            <Button className="flex items-center gap-2">
+                <Plus className="w-4 h-4" />
+                Add Product
+            </Button></div>
 
             {/* Table Card */}
             <div className="bg-white rounded-lg shadow overflow-hidden">

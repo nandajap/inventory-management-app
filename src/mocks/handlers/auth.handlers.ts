@@ -70,7 +70,7 @@ export const authHandlers = [
     //Refresh token
     http.post(`${BASE_URL}/auth/refresh`, async ({ request }) => {
         await new Promise(resolve => setTimeout(resolve, 500));
-
+        console.log('MSW: Token refresh initiated');
         const { refreshToken } = await request.json() as { refreshToken: string };
         
         //Check if refresh token is expired
