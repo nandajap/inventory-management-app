@@ -11,7 +11,7 @@ async function enableMocking() {
 
   // Start the worker
   return worker.start({
-    onUnhandledRequest: 'warn', // Warn about requests MSW doesn't handle
+    onUnhandledRequest: 'bypass', 
   });
 }
 

@@ -9,6 +9,7 @@ import { productService } from '../services/productService';
 import PermissionGuard from '../components/auth/PermissionGuard';
 import { usePermissions } from '../hooks/usePermissions';
 import { Button } from '@/components/ui/button';
+import AddEditProductModal from '@/components/inventory/AddEditProductModal';
 
 export default function Inventory() {
     const queryClient = useQueryClient();
@@ -20,6 +21,10 @@ export default function Inventory() {
     const [sortBy, setSortBy] = useState<SortField | undefined>(undefined);
     const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
 
+    //Add/Edit model states
+    const [isModelOpen, setIsModelOpen] = useState(false);
+    const [modelMode, setModelMode] = useState<'add' | 'edit'>('add');
+
     const { can } = usePermissions();
     const hasAnyActions = can('product.edit') || can('product.delete');
 
@@ -29,6 +34,7 @@ export default function Inventory() {
         queryKey: ['products', currentPage, pageSize, sortBy, sortOrder], // ← Cache per page+size+sort
         queryFn: () => productService.fetchProducts(currentPage, pageSize, sortBy, sortOrder),
         staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+        refetchOnWindowFocus: false, 
         placeholderData: (previousData) => previousData, // Keep old data while loading
     });
 
@@ -64,7 +70,8 @@ export default function Inventory() {
     const handleEdit = (product: Product) => {
         console.log('Edit product:', product);
         // TODO: Will be implemented in Week 3 with modal
-        alert(`Edit: ${product.name}`);
+        setIsModelOpen(true);
+        setModelMode('edit');
     };
 
     const handleDelete = async (product: Product) => {
@@ -96,15 +103,21 @@ export default function Inventory() {
         <div className="p-4">
             {/* Page Header */}
             <div className="mb-6 flex items-center justify-between">
-            <div className="mb-6">
-                <h1 className="text-2xl font-bold text-gray-900">Inventory Management</h1>
-                <p className="text-gray-600 mt-1">Manage your product inventory</p>
-            </div>
+                <div className="mb-6">
+                    <h1 className="text-2xl font-bold text-gray-900">Inventory Management</h1>
+                    <p className="text-gray-600 mt-1">Manage your product inventory</p>
+                </div>
 
-            <Button className="flex items-center gap-2">
-                <Plus className="w-4 h-4" />
-                Add Product
-            </Button></div>
+                <Button
+                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                    onClick={() => {
+                        setIsModelOpen(true);
+                        setModelMode('add');
+                    }}
+                >
+                    <Plus className="w-4 h-4" />
+                    Add Product
+                </Button></div>
 
             {/* Table Card */}
             <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -238,6 +251,11 @@ export default function Inventory() {
                     />
                 )}
             </div>
+            <AddEditProductModal
+                isOpen={isModelOpen}
+                onClose={() => setIsModelOpen(false)}
+                mode={modelMode}
+            />
         </div>
     );
 }

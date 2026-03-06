@@ -6,7 +6,7 @@ const BASE_URL = "https://api.inventoryapp.com"; //mock base url
 // Create Axios instance with base configuration
 export const apiClient = axios.create({
   baseURL: BASE_URL,
-  timeout: 5000,
+  timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -48,6 +48,7 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
+
     const originalRequest = error.config as InternalAxiosRequestConfig & {
       _retry?: boolean;
     };
