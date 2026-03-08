@@ -5,19 +5,23 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { ProductForm } from './ProductForm';
-import { BaseFormData } from '../../schemas/product.schema';
+import { ProductFormInput } from '../../schemas/product.schema';
+import { Product } from '@/types/inventory';
 
 interface AddEditProductModalProps {
-    isOpen: boolean,
-    onClose: () => void,
-    mode: 'add' | 'edit'
+    isOpen: boolean;
+    onClose: () => void;
+    mode: 'add' | 'edit';
+    product?: Product;
+    onSuccess: () => void;
 }
 
-export default function AddEditProductModal({ isOpen, onClose, mode }: AddEditProductModalProps) {
+export default function AddEditProductModal({ isOpen, onClose, mode, product,
+    onSuccess }: AddEditProductModalProps) {
 
     const title = mode === 'add' ? "Add New Product" : "Edit Product";
     
-    const handleFormSubmit = (data: BaseFormData) => {
+    const handleFormSubmit = (data: ProductFormInput) => {
         console.log('Form submitted:', data);
         // TODO: Phase 5 will handle actual save
         onClose();

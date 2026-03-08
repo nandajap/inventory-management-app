@@ -1,5 +1,5 @@
-import { BaseFormData, baseFormSchema } from "@/schemas/product.schema";
-import React from "react";
+import { ProductFormInput, productFormSchema } from "@/schemas/product.schema";
+import { useEffect } from "react";
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -22,22 +22,37 @@ import { Button } from '@/components/ui/button';
 
 
 interface ProductFormProps {
-    onSubmit: (data: BaseFormData) => void;
+    onSubmit: (data: ProductFormInput) => void;
     onCancel: () => void;
+    initialData?: Partial<ProductFormInput>;
 }
 
-export const ProductForm: React.FC<ProductFormProps> = ({ onSubmit, onCancel }) => {
+export function ProductForm({ onSubmit, onCancel, initialData }: ProductFormProps) {
 
-    const form = useForm<BaseFormData>({
-        resolver: zodResolver(baseFormSchema),
-        defaultValues: {
-            category: undefined,
-            name: '',
-            sku: '',
-            price: 0,
-            stockLevel: 0,
+    const form = useForm<ProductFormInput>({
+        resolver: zodResolver(productFormSchema),
+        defaultValues: initialData || {
+            category: 'electronics',
+            attributes: {
+                brand: '',
+                warrantyMonths: 12,
+            },
         },
     });
+
+    // Watch category to change dynamic fields
+    const selectedCategory = form.watch("category");
+
+    // Reset attributes when category changes to maintain schema integrity
+    useEffect(() => {
+        if (selectedCategory === "electronics") {
+            form.setValue("attributes", { brand: "", warrantyMonths: 12 });
+        } else if (selectedCategory === "clothing") {
+            form.setValue("attributes", { size: "M", material: "Cotton" });
+        } else if (selectedCategory === "books") {
+            form.setValue("attributes", { author: "", genre: "Fiction" });
+        }
+    }, [selectedCategory, form]);
 
     return (
         <Form {...form}>
@@ -144,6 +159,124 @@ export const ProductForm: React.FC<ProductFormProps> = ({ onSubmit, onCancel }) 
                         </FormItem>
                     )}
                 />
+
+                {/* DYNAMIC FIELDS SECTION */}
+                <div className="p-4 border rounded-lg bg-slate-50 dark:bg-slate-900 space-y-4">
+                    <h3 className="font-medium text-sm text-slate-500 uppercase tracking-wider">
+                        {selectedCategory} Specifications
+                    </h3>
+
+                    {selectedCategory === "electronics" && (
+                        <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                                control={form.control}
+                                name="attributes.brand"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Brand</FormLabel>
+                                        <FormControl><Input {...field} /></FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="attributes.warrantyMonths"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Warranty (Months)</FormLabel>
+                                        <Select onValueChange={(v) => field.onChange(parseInt(v))} defaultValue={field.value?.toString()}>
+                                            <FormControl>
+                                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                <SelectItem value="12">12 Months</SelectItem>
+                                                <SelectItem value="24">24 Months</SelectItem>
+                                                <SelectItem value="36">36 Months</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+                    )}
+
+                    {selectedCategory === "clothing" && (
+                        <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                                control={form.control}
+                                name="attributes.size"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Size</FormLabel>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                {['XS', 'S', 'M', 'L', 'XL', 'XXL'].map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="attributes.material"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Material</FormLabel>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                {['Cotton', 'Polyester', 'Wool', 'Silk', 'Blend'].map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+                    )}
+
+                    {selectedCategory === "books" && (
+                        <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                                control={form.control}
+                                name="attributes.author"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Author</FormLabel>
+                                        <FormControl><Input {...field} /></FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="attributes.genre"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Genre</FormLabel>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                {['Fiction', 'Non-Fiction', 'Science', 'History', 'Children', 'Biography'].map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+                    )}
+                </div>
 
                 {/* Action Buttons */}
                 <div className="flex justify-end gap-2 pt-4">
