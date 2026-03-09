@@ -10,11 +10,12 @@ const productBaseSchema = z.object({
         .min(1, 'SKU is required')
         .regex(/^[A-Z]{4}-\d{3}$/, 'SKU must be in format XXXX-000 (e.g., ELEC-001)'),
 
-    stockLevel: z.number()
+    stockLevel: z.number('Stock level is required')
         .int('Stock level must be a whole number')
         .min(0, 'Stock level cannot be negative'),
 
-    price: z.number()
+    price: z
+        .number("Price is required") // This catches the "" or NaN cases)
         .positive('Price must be greater than 0')
         .max(999999.99, 'Price is too high'),
 

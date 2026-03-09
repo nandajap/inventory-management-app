@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { SortField, SortOrder } from '../mocks/handlers/products.handlers';
 import { Product } from '../types/inventory';
 import { Pencil, Trash2, ArrowUpDown, ArrowUp, ArrowDown, Package, Plus } from 'lucide-react';
@@ -10,6 +10,7 @@ import PermissionGuard from '../components/auth/PermissionGuard';
 import { usePermissions } from '../hooks/usePermissions';
 import { Button } from '@/components/ui/button';
 import AddEditProductModal from '@/components/inventory/AddEditProductModal';
+import { useToast } from '@/hooks/use-toast';
 
 export default function Inventory() {
     const queryClient = useQueryClient();
@@ -22,11 +23,14 @@ export default function Inventory() {
     const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
 
     //Add/Edit model states
-    const [isModelOpen, setIsModelOpen] = useState(false);
-    const [modelMode, setModelMode] = useState<'add' | 'edit'>('add');
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
+    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
     const { can } = usePermissions();
     const hasAnyActions = can('product.edit') || can('product.delete');
+
+    const {toast} = useToast();
 
 
     //Fetch Data (Server-Side Pagination)
@@ -34,7 +38,8 @@ export default function Inventory() {
         queryKey: ['products', currentPage, pageSize, sortBy, sortOrder], // ← Cache per page+size+sort
         queryFn: () => productService.fetchProducts(currentPage, pageSize, sortBy, sortOrder),
         staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-        refetchOnWindowFocus: false, 
+        refetchOnWindowFocus: false,
+        retry: 1, // Allow one retry if MSW was just sleepy
         placeholderData: (previousData) => previousData, // Keep old data while loading
     });
 
@@ -69,23 +74,35 @@ export default function Inventory() {
 
     const handleEdit = (product: Product) => {
         console.log('Edit product:', product);
-        // TODO: Will be implemented in Week 3 with modal
-        setIsModelOpen(true);
-        setModelMode('edit');
+        setSelectedProduct(product);
+        setIsModalOpen(true);
+        setModalMode('edit');
     };
 
-    const handleDelete = async (product: Product) => {
+    // Function to handle clicking "Add"
+    const handleAddClick = () => {
+        setSelectedProduct(null); // Clear any previous selection
+        setIsModalOpen(true);
+        setModalMode('add');
+    };
+
+    const deleteMutation = useMutation({
+        mutationFn: productService.delete,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['products'] });
+            toast({ title: "Product deleted", variant: "destructive" });
+        }
+    });
+
+    const handleDelete = (product: Product) => {
         const confirmed = window.confirm(
             `Are you sure you want to delete "${product.name}"?`
         );
         if (!confirmed) return;
-
         try {
-            await productService.delete(product.id);
-            // Invalidate and refetch the products
-            queryClient.invalidateQueries({ queryKey: ['products'] });
+            deleteMutation.mutate(product.id);
         } catch (error) {
-            console.error('Delete failed:', error);
+            console.error('Delete failed: ', error);
             alert('Failed to delete product. Please try again.');
         }
 
@@ -107,17 +124,16 @@ export default function Inventory() {
                     <h1 className="text-2xl font-bold text-gray-900">Inventory Management</h1>
                     <p className="text-gray-600 mt-1">Manage your product inventory</p>
                 </div>
-
-                <Button
-                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                    onClick={() => {
-                        setIsModelOpen(true);
-                        setModelMode('add');
-                    }}
-                >
-                    <Plus className="w-4 h-4" />
-                    Add Product
-                </Button></div>
+                <PermissionGuard permission='product.create'>
+                    <Button
+                        className="bg-blue-600 text-white px-2 py-1 sm:px-4 sm:py-2 rounded hover:bg-blue-700"
+                        onClick={handleAddClick}
+                    >
+                        <Plus className="w-4 h-4" />
+                        <span className="hidden sm:inline">Add Product</span>
+                    </Button>
+                </PermissionGuard>
+            </div>
 
             {/* Table Card */}
             <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -252,9 +268,13 @@ export default function Inventory() {
                 )}
             </div>
             <AddEditProductModal
-                isOpen={isModelOpen}
-                onClose={() => setIsModelOpen(false)}
-                mode={modelMode}
+                isOpen={isModalOpen}
+                onClose={() => {
+                    setIsModalOpen(false);
+                    setSelectedProduct(null);
+                }}
+                mode={modalMode}
+                initialData={selectedProduct || undefined}
             />
         </div>
     );

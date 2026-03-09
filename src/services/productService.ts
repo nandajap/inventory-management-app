@@ -16,13 +16,13 @@ export const productService = {
     },
 
     //create product
-     async create(data: ProductFormData): Promise<Product> {
+     async createProduct(data: ProductFormData): Promise<Product> {
         const response = await apiClient.post<Product>(`${baseURL}`, data);
         return response.data;
     },
 
     // Update product
-    async update(id: number, data: ProductFormData): Promise<Product> {
+    async updateProduct(id: number, data: ProductFormData): Promise<Product> {
         const response = await apiClient.patch<Product>(`${baseURL}/${id}`, data);
         return response.data;
     },

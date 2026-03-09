@@ -4,6 +4,7 @@ import Inventory from './pages/Inventory'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { Login } from './pages/Login';
+import { Toaster } from './components/ui/toaster';
 
 
 function App() {
@@ -31,6 +32,7 @@ function App() {
           <Route path="*" element={<Navigate to="/login" replace />} />
 
         </Routes>
+        <Toaster/>
       </AuthProvider>
     </BrowserRouter>
   )

@@ -6,26 +6,55 @@ import {
 } from '@/components/ui/dialog';
 import { ProductForm } from './ProductForm';
 import { ProductFormInput } from '../../schemas/product.schema';
+import { productService } from '@/services/productService';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Product } from '@/types/inventory';
+import { useToast } from '@/hooks/use-toast';
 
 interface AddEditProductModalProps {
     isOpen: boolean;
     onClose: () => void;
     mode: 'add' | 'edit';
-    product?: Product;
-    onSuccess: () => void;
+    initialData?:Product
 }
 
-export default function AddEditProductModal({ isOpen, onClose, mode, product,
-    onSuccess }: AddEditProductModalProps) {
+export default function AddEditProductModal({ isOpen, onClose, mode, initialData}: AddEditProductModalProps) {
+
+    const {toast} = useToast();
+    const queryClient = useQueryClient();
+    // PHASE 6: The Mutation
+    const { mutateAsync, isPending } = useMutation({
+        mutationFn: (data: ProductFormInput) => {
+            if (mode === 'edit' && initialData?.id) {
+            // Call PATCH /products/:id
+            return productService.updateProduct(initialData.id, data);
+        }
+        // Call POST /products
+        return productService.createProduct(data);
+        },
+        onSuccess: () => {
+            //refresh table data
+            queryClient.invalidateQueries({ queryKey: ['products'] });
+            toast({
+                title: mode === 'add' ? "Product Created" : "Product Updated",
+                description: `Successfully ${mode === 'add' ? 'added' : 'updated'} the product in your inventory.`,
+                variant: "default", // or "destructive" for errors
+            })
+            onClose(); 
+        },
+        onError: (error) => {
+            console.error("Submission failed:", error);
+            alert("Error creating product. Check console.");
+        }
+    });
+
+    const handleFormSubmit = async (data: ProductFormInput) => {
+        console.log('Form submitted:', data);
+        mutateAsync(data);
+    };
 
     const title = mode === 'add' ? "Add New Product" : "Edit Product";
-    
-    const handleFormSubmit = (data: ProductFormInput) => {
-        console.log('Form submitted:', data);
-        // TODO: Phase 5 will handle actual save
-        onClose();
-    };
+
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
@@ -37,6 +66,8 @@ export default function AddEditProductModal({ isOpen, onClose, mode, product,
                 <ProductForm
                     onSubmit={handleFormSubmit}
                     onCancel={onClose}
+                    initialData={initialData}
+                    isLoading={isPending}
                 >
                 </ProductForm>
             </DialogContent>

@@ -1,5 +1,5 @@
 import { ProductFormInput, productFormSchema } from "@/schemas/product.schema";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -19,19 +19,24 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-
+import { Loader2 } from "lucide-react";
 
 interface ProductFormProps {
     onSubmit: (data: ProductFormInput) => void;
     onCancel: () => void;
     initialData?: Partial<ProductFormInput>;
+    isLoading?: boolean;
 }
 
-export function ProductForm({ onSubmit, onCancel, initialData }: ProductFormProps) {
+export function ProductForm({ onSubmit, onCancel, initialData, isLoading }: ProductFormProps) {
 
     const form = useForm<ProductFormInput>({
         resolver: zodResolver(productFormSchema),
         defaultValues: initialData || {
+            name: "",
+            sku: "",
+            price: undefined,
+            stockLevel: undefined,
             category: 'electronics',
             attributes: {
                 brand: '',
@@ -39,20 +44,46 @@ export function ProductForm({ onSubmit, onCancel, initialData }: ProductFormProp
             },
         },
     });
-
     // Watch category to change dynamic fields
     const selectedCategory = form.watch("category");
+    const previousCategoryRef = useRef(selectedCategory);
+
+    // Store original category and attributes for edit mode
+    const originalDataRef = useRef(initialData ? {
+        category: initialData.category,
+        attributes: initialData.attributes
+    } : null);
 
     // Reset attributes when category changes to maintain schema integrity
     useEffect(() => {
-        if (selectedCategory === "electronics") {
-            form.setValue("attributes", { brand: "", warrantyMonths: 12 });
-        } else if (selectedCategory === "clothing") {
-            form.setValue("attributes", { size: "M", material: "Cotton" });
-        } else if (selectedCategory === "books") {
-            form.setValue("attributes", { author: "", genre: "Fiction" });
+        // Only reset if category actually changed (not on initial mount/remount)
+        if (previousCategoryRef.current === selectedCategory) {
+            return;
         }
+
+        // If switching back to original category in edit mode, restore original data
+        if (originalDataRef.current && selectedCategory === originalDataRef.current.category && originalDataRef.current.attributes) {
+            form.setValue("attributes", originalDataRef.current.attributes);
+        } else {
+            // Reset to defaults
+            if (selectedCategory === "electronics") {
+                form.setValue("attributes", { brand: "", warrantyMonths: 12 });
+            } else if (selectedCategory === "clothing") {
+                form.setValue("attributes", { size: "" as any, material: "" as any });
+            } else if (selectedCategory === "books") {
+                form.setValue("attributes", { author: "", genre: "" as any });
+            }
+        }
+        previousCategoryRef.current = selectedCategory;
     }, [selectedCategory, form]);
+
+    //     useEffect(() => {
+    //     if (initialData) {
+    //         form.reset(initialData);
+    //     } else {
+    //         form.reset();
+    //     }
+    // }, [initialData, form]);
 
     return (
         <Form {...form}>
@@ -129,8 +160,16 @@ export function ProductForm({ onSubmit, onCancel, initialData }: ProductFormProp
                                     type="number"
                                     step="0.01"
                                     placeholder="0.00"
-                                    {...field}
-                                    onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                                    value={field.value ?? ''}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        if (value === '') {
+                                            field.onChange(undefined); // Let Zod validate
+                                        } else {
+                                            const numValue = Number(value);
+                                            field.onChange(isNaN(numValue) ? undefined : numValue);
+                                        }
+                                    }}
                                 />
                             </FormControl>
                             <FormMessage />
@@ -151,8 +190,16 @@ export function ProductForm({ onSubmit, onCancel, initialData }: ProductFormProp
                                 <Input
                                     type="number"
                                     placeholder="0"
-                                    {...field}
-                                    onChange={(e) => field.onChange(parseInt(e.target.value))}
+                                    value={field.value ?? ''}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        if (value === '') {
+                                            field.onChange(undefined); // Let Zod validate
+                                        } else {
+                                            const numValue = Number(value);
+                                            field.onChange(isNaN(numValue) ? undefined : numValue);
+                                        }
+                                    }}
                                 />
                             </FormControl>
                             <FormMessage />
@@ -185,9 +232,10 @@ export function ProductForm({ onSubmit, onCancel, initialData }: ProductFormProp
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Warranty (Months)</FormLabel>
-                                        <Select onValueChange={(v) => field.onChange(parseInt(v))} defaultValue={field.value?.toString()}>
+                                        <Select onValueChange={(v) => field.onChange(Number(v))} 
+                                        value={field.value?.toString()|| "12"} >
                                             <FormControl>
-                                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                                <SelectTrigger><SelectValue placeholder="Select warranty" /></SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
                                                 <SelectItem value="12">12 Months</SelectItem>
@@ -212,7 +260,7 @@ export function ProductForm({ onSubmit, onCancel, initialData }: ProductFormProp
                                         <FormLabel>Size</FormLabel>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                                             <FormControl>
-                                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                                <SelectTrigger><SelectValue placeholder="Select a size" /></SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
                                                 {['XS', 'S', 'M', 'L', 'XL', 'XXL'].map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
@@ -230,7 +278,7 @@ export function ProductForm({ onSubmit, onCancel, initialData }: ProductFormProp
                                         <FormLabel>Material</FormLabel>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                                             <FormControl>
-                                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                                <SelectTrigger><SelectValue placeholder="Select a material" /></SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
                                                 {['Cotton', 'Polyester', 'Wool', 'Silk', 'Blend'].map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
@@ -264,7 +312,7 @@ export function ProductForm({ onSubmit, onCancel, initialData }: ProductFormProp
                                         <FormLabel>Genre</FormLabel>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                                             <FormControl>
-                                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                                <SelectTrigger><SelectValue placeholder="Select a genre" /></SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
                                                 {['Fiction', 'Non-Fiction', 'Science', 'History', 'Children', 'Biography'].map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}
@@ -283,8 +331,15 @@ export function ProductForm({ onSubmit, onCancel, initialData }: ProductFormProp
                     <Button type="button" variant="outline" onClick={onCancel}>
                         Cancel
                     </Button>
-                    <Button type="submit" disabled={form.formState.isSubmitting}>
-                        {form.formState.isSubmitting ? 'Saving...' : 'Add Product'}
+                    <Button type="submit" disabled={isLoading || form.formState.isSubmitting}>
+                        {isLoading ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Saving...
+                            </>
+                        ) : (
+                            'Submit'
+                        )}
                     </Button>
                 </div>
             </form>
