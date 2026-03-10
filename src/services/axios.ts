@@ -1,7 +1,6 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { STORAGE_KEYS } from '../constants/storage';
-
-const BASE_URL = "https://api.inventoryapp.com"; //mock base url
+import { BASE_URL } from '@/constants/api';
 
 // Create Axios instance with base configuration
 export const apiClient = axios.create({
@@ -48,6 +47,11 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
+    // Handle Timeout specifically
+    if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+        console.error('Request timed out. MSW might be throttled by the browser.');
+        return Promise.reject(error);
+    }
 
     const originalRequest = error.config as InternalAxiosRequestConfig & {
       _retry?: boolean;

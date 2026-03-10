@@ -1,8 +1,7 @@
 import { User, AuthTokens } from "../../types/auth";
 import { http, HttpResponse } from 'msw';
 import { isTokenExpired } from "../../utils/tokenValidation";
-
-const BASE_URL = 'https://api.inventoryapp.com';
+import { BASE_URL } from "@/constants/api";
 
 const MOCK_USERS: Record<string, { password: string; user: User }> = {
     'admin@example.com': {

@@ -20,11 +20,12 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from "lucide-react";
+import { ProductFormData } from "@/types/inventory";
 
 interface ProductFormProps {
-    onSubmit: (data: ProductFormInput) => void;
+    onSubmit: (data: ProductFormData) => void;
     onCancel: () => void;
-    initialData?: Partial<ProductFormInput>;
+    initialData?: any;
     isLoading?: boolean;
 }
 
@@ -32,18 +33,18 @@ export function ProductForm({ onSubmit, onCancel, initialData, isLoading }: Prod
 
     const form = useForm<ProductFormInput>({
         resolver: zodResolver(productFormSchema),
-        defaultValues: initialData || {
-            name: "",
-            sku: "",
-            price: undefined,
-            stockLevel: undefined,
-            category: 'electronics',
-            attributes: {
-                brand: '',
-                warrantyMonths: 12,
-            },
-        },
+        defaultValues: {
+            ...initialData,
+            // Convert numbers to strings for the form state
+            price: initialData?.price?.toString() ?? "",
+            stockLevel: initialData?.stockLevel?.toString() ?? "",
+            name: initialData?.name ?? "",
+            sku: initialData?.sku ?? "",
+            category: initialData?.category ?? 'electronics',
+            attributes: initialData?.attributes ?? { brand: '', warrantyMonths: 12 }
+        } as any, // Cast to any once to allow the string/number transition
     });
+
     // Watch category to change dynamic fields
     const selectedCategory = form.watch("category");
     const previousCategoryRef = useRef(selectedCategory);
@@ -77,17 +78,20 @@ export function ProductForm({ onSubmit, onCancel, initialData, isLoading }: Prod
         previousCategoryRef.current = selectedCategory;
     }, [selectedCategory, form]);
 
-    //     useEffect(() => {
-    //     if (initialData) {
-    //         form.reset(initialData);
-    //     } else {
-    //         form.reset();
-    //     }
-    // }, [initialData, form]);
+    const handleActualSubmit = (data: ProductFormInput) => {
+        // Convert the strings back to numbers before sending to the API/Mutation
+        const formattedData: ProductFormData = {
+            ...data,
+            price: Number(data.price),
+            stockLevel: Number(data.stockLevel),
+        }as ProductFormData;
+        // This 'formattedData' matches your ProductFormData perfectly
+        onSubmit(formattedData);
+    };
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(handleActualSubmit)} className="space-y-4">
                 {/* Category */}
                 <FormField
                     control={form.control}
@@ -157,19 +161,12 @@ export function ProductForm({ onSubmit, onCancel, initialData, isLoading }: Prod
                             </FormLabel>
                             <FormControl>
                                 <Input
-                                    type="number"
+                                    type="text"
                                     step="0.01"
                                     placeholder="0.00"
-                                    value={field.value ?? ''}
-                                    onChange={(e) => {
-                                        const value = e.target.value;
-                                        if (value === '') {
-                                            field.onChange(undefined); // Let Zod validate
-                                        } else {
-                                            const numValue = Number(value);
-                                            field.onChange(isNaN(numValue) ? undefined : numValue);
-                                        }
-                                    }}
+                                    {...field}
+
+
                                 />
                             </FormControl>
                             <FormMessage />
@@ -188,18 +185,10 @@ export function ProductForm({ onSubmit, onCancel, initialData, isLoading }: Prod
                             </FormLabel>
                             <FormControl>
                                 <Input
-                                    type="number"
+                                    type="text" // Changed to text to prevent 'e' or 'NaN' issues
                                     placeholder="0"
-                                    value={field.value ?? ''}
-                                    onChange={(e) => {
-                                        const value = e.target.value;
-                                        if (value === '') {
-                                            field.onChange(undefined); // Let Zod validate
-                                        } else {
-                                            const numValue = Number(value);
-                                            field.onChange(isNaN(numValue) ? undefined : numValue);
-                                        }
-                                    }}
+                                    {...field}
+                                    
                                 />
                             </FormControl>
                             <FormMessage />
@@ -232,8 +221,8 @@ export function ProductForm({ onSubmit, onCancel, initialData, isLoading }: Prod
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Warranty (Months)</FormLabel>
-                                        <Select onValueChange={(v) => field.onChange(Number(v))} 
-                                        value={field.value?.toString()|| "12"} >
+                                        <Select onValueChange={(v) => field.onChange(Number(v))}
+                                            value={field.value?.toString() || "12"} >
                                             <FormControl>
                                                 <SelectTrigger><SelectValue placeholder="Select warranty" /></SelectTrigger>
                                             </FormControl>

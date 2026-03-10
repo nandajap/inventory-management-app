@@ -37,8 +37,8 @@ export function TopNavbar() {
               className="w-8 h-8 object-cover flex-shrink-0" 
             />
             <h1 className="text-sm sm:text-base lg:text-xl font-semibold text-gray-900 truncate">
-              <span className="hidden sm:inline">Inventory Management</span>
-              <span className="sm:hidden">Inventory</span> 
+              <span className="hidden sm:inline">StockPulse Solutions</span>
+              <span className="sm:hidden">StockPulse</span> 
             </h1>
           </div>
 

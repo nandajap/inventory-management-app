@@ -6,12 +6,14 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 // Start MSW 
 async function enableMocking() {
-
   const { worker } = await import('./mocks/browser');
 
   // Start the worker
   return worker.start({
     onUnhandledRequest: 'bypass', 
+    serviceWorker: {
+      url: '/mockServiceWorker.js', 
+    }
   });
 }
 

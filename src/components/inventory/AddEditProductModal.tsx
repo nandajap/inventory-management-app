@@ -5,11 +5,11 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { ProductForm } from './ProductForm';
-import { ProductFormInput } from '../../schemas/product.schema';
 import { productService } from '@/services/productService';
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Product } from '@/types/inventory';
 import { useToast } from '@/hooks/use-toast';
+import { ProductFormData } from '@/types/inventory';
 
 interface AddEditProductModalProps {
     isOpen: boolean;
@@ -24,7 +24,7 @@ export default function AddEditProductModal({ isOpen, onClose, mode, initialData
     const queryClient = useQueryClient();
     // PHASE 6: The Mutation
     const { mutateAsync, isPending } = useMutation({
-        mutationFn: (data: ProductFormInput) => {
+        mutationFn: (data: ProductFormData) => {
             if (mode === 'edit' && initialData?.id) {
             // Call PATCH /products/:id
             return productService.updateProduct(initialData.id, data);
@@ -48,7 +48,7 @@ export default function AddEditProductModal({ isOpen, onClose, mode, initialData
         }
     });
 
-    const handleFormSubmit = async (data: ProductFormInput) => {
+    const handleFormSubmit = async (data: ProductFormData) => {
         console.log('Form submitted:', data);
         mutateAsync(data);
     };

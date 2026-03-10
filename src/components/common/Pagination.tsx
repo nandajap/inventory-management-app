@@ -45,7 +45,7 @@ export default function Pagination({
                     <Select.Portal>
                         <Select.Content className="bg-white rounded-md shadow-lg border border-gray-200 overflow-hidden">
                             <Select.Viewport>
-                                {[10, 25, 50, 100].map((size) => (
+                                {[5, 10, 25].map((size) => (
                                     <Select.Item
                                         key={size}
                                         value={size.toString()}
