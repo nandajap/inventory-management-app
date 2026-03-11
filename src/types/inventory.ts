@@ -40,20 +40,6 @@ export type Product = ElectronicsProduct | ClothingProduct | BooksProduct;
 // For forms (without id and lastUpdated)
 export type ProductFormData = Omit<Product, 'id' | 'lastUpdated'>;
 
-export interface ProductAttributes{
- // Electronics specific
-    brand?: string;
-    warranty?: number;  // in months
-    
-    // Clothing specific
-    size?: string;
-    color?: string;
-    
-    // Books specific
-    author?: string;
-    genre?: string;
-}
-
 export interface PaginatedResponse<T> {
     data: T[];
     pagination: {

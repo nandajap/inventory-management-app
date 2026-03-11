@@ -76,10 +76,3 @@ export const productFormSchema = z.discriminatedUnion('category', [
 // Type inference from Zod schema (should match ProductFormData)
 export type ProductFormInput = z.infer<typeof productFormSchema>;
 
-// TEMPORARY: For learning forms without dynamic fields
-export const baseFormSchema = productBaseSchema.extend({
-    category: z.enum(['electronics', 'clothing', 'books']),
-});
-export type BaseFormData = z.infer<typeof baseFormSchema>;
-
-

@@ -85,7 +85,6 @@ export function ProductForm({ onSubmit, onCancel, initialData, isLoading }: Prod
             price: Number(data.price),
             stockLevel: Number(data.stockLevel),
         }as ProductFormData;
-        // This 'formattedData' matches your ProductFormData perfectly
         onSubmit(formattedData);
     };
 
@@ -162,11 +161,8 @@ export function ProductForm({ onSubmit, onCancel, initialData, isLoading }: Prod
                             <FormControl>
                                 <Input
                                     type="text"
-                                    step="0.01"
                                     placeholder="0.00"
                                     {...field}
-
-
                                 />
                             </FormControl>
                             <FormMessage />
@@ -185,7 +181,7 @@ export function ProductForm({ onSubmit, onCancel, initialData, isLoading }: Prod
                             </FormLabel>
                             <FormControl>
                                 <Input
-                                    type="text" // Changed to text to prevent 'e' or 'NaN' issues
+                                    type="text" 
                                     placeholder="0"
                                     {...field}
                                     

@@ -15,22 +15,22 @@ interface AddEditProductModalProps {
     isOpen: boolean;
     onClose: () => void;
     mode: 'add' | 'edit';
-    initialData?:Product
+    initialData?: Product
 }
 
-export default function AddEditProductModal({ isOpen, onClose, mode, initialData}: AddEditProductModalProps) {
+export default function AddEditProductModal({ isOpen, onClose, mode, initialData }: AddEditProductModalProps) {
 
-    const {toast} = useToast();
+    const { toast } = useToast();
     const queryClient = useQueryClient();
     // PHASE 6: The Mutation
     const { mutateAsync, isPending } = useMutation({
         mutationFn: (data: ProductFormData) => {
             if (mode === 'edit' && initialData?.id) {
-            // Call PATCH /products/:id
-            return productService.updateProduct(initialData.id, data);
-        }
-        // Call POST /products
-        return productService.createProduct(data);
+                // Call PATCH /products/:id
+                return productService.updateProduct(initialData.id, data);
+            }
+            // Call POST /products
+            return productService.createProduct(data);
         },
         onSuccess: () => {
             //refresh table data
@@ -38,9 +38,9 @@ export default function AddEditProductModal({ isOpen, onClose, mode, initialData
             toast({
                 title: mode === 'add' ? "Product Created" : "Product Updated",
                 description: `Successfully ${mode === 'add' ? 'added' : 'updated'} the product in your inventory.`,
-                variant: "default", // or "destructive" for errors
+                variant: "default", 
             })
-            onClose(); 
+            onClose();
         },
         onError: (error) => {
             console.error("Submission failed:", error);
