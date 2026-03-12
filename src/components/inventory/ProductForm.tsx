@@ -31,6 +31,8 @@ interface ProductFormProps {
 
 export function ProductForm({ onSubmit, onCancel, initialData, isLoading }: ProductFormProps) {
 
+    const categoryItems = [{name:'Electronics', value:'electronics'}, {name: 'Clothing' ,value:'clothing'}, {name: 'Books' ,value:'books'}];
+
     const form = useForm<ProductFormInput>({
         resolver: zodResolver(productFormSchema),
         defaultValues: {
@@ -97,8 +99,8 @@ export function ProductForm({ onSubmit, onCancel, initialData, isLoading }: Prod
                     name="category"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>
-                                Category <span className="text-red-500">*</span>
+                            <FormLabel required>
+                                Category 
                             </FormLabel>
                             <Select onValueChange={field.onChange} defaultValue={field.value}>
                                 <FormControl>
@@ -107,9 +109,7 @@ export function ProductForm({ onSubmit, onCancel, initialData, isLoading }: Prod
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                    <SelectItem value="electronics">Electronics</SelectItem>
-                                    <SelectItem value="clothing">Clothing</SelectItem>
-                                    <SelectItem value="books">Books</SelectItem>
+                                    {categoryItems.map(item => <SelectItem value={item.value}>{item.name}</SelectItem>)}
                                 </SelectContent>
                             </Select>
                             <FormMessage />
@@ -122,8 +122,8 @@ export function ProductForm({ onSubmit, onCancel, initialData, isLoading }: Prod
                     name="name"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>
-                                Product Name <span className="text-red-500">*</span>
+                            <FormLabel required>
+                                Product Name 
                             </FormLabel>
                             <FormControl>
                                 <Input placeholder="Enter product name" {...field} />
@@ -138,8 +138,8 @@ export function ProductForm({ onSubmit, onCancel, initialData, isLoading }: Prod
                     name="sku"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>
-                                SKU <span className="text-red-500">*</span>
+                            <FormLabel required>
+                                SKU 
                             </FormLabel>
                             <FormControl>
                                 <Input placeholder="ELEC-001" {...field} />
@@ -155,8 +155,8 @@ export function ProductForm({ onSubmit, onCancel, initialData, isLoading }: Prod
                     name="price"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>
-                                Price ($) <span className="text-red-500">*</span>
+                            <FormLabel required>
+                                Price ($) 
                             </FormLabel>
                             <FormControl>
                                 <Input
@@ -176,8 +176,8 @@ export function ProductForm({ onSubmit, onCancel, initialData, isLoading }: Prod
                     name="stockLevel"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>
-                                Stock Level <span className="text-red-500">*</span>
+                            <FormLabel required>
+                                Stock Level 
                             </FormLabel>
                             <FormControl>
                                 <Input
@@ -205,7 +205,7 @@ export function ProductForm({ onSubmit, onCancel, initialData, isLoading }: Prod
                                 name="attributes.brand"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Brand</FormLabel>
+                                        <FormLabel required>Brand</FormLabel>
                                         <FormControl><Input {...field} /></FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -216,7 +216,7 @@ export function ProductForm({ onSubmit, onCancel, initialData, isLoading }: Prod
                                 name="attributes.warrantyMonths"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Warranty (Months)</FormLabel>
+                                        <FormLabel required>Warranty (Months)</FormLabel>
                                         <Select onValueChange={(v) => field.onChange(Number(v))}
                                             value={field.value?.toString() || "12"} >
                                             <FormControl>
@@ -242,7 +242,7 @@ export function ProductForm({ onSubmit, onCancel, initialData, isLoading }: Prod
                                 name="attributes.size"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Size</FormLabel>
+                                        <FormLabel required>Size</FormLabel>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                                             <FormControl>
                                                 <SelectTrigger><SelectValue placeholder="Select a size" /></SelectTrigger>
@@ -260,7 +260,7 @@ export function ProductForm({ onSubmit, onCancel, initialData, isLoading }: Prod
                                 name="attributes.material"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Material</FormLabel>
+                                        <FormLabel required>Material</FormLabel>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                                             <FormControl>
                                                 <SelectTrigger><SelectValue placeholder="Select a material" /></SelectTrigger>
@@ -283,7 +283,7 @@ export function ProductForm({ onSubmit, onCancel, initialData, isLoading }: Prod
                                 name="attributes.author"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Author</FormLabel>
+                                        <FormLabel required>Author</FormLabel>
                                         <FormControl><Input {...field} /></FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -294,7 +294,7 @@ export function ProductForm({ onSubmit, onCancel, initialData, isLoading }: Prod
                                 name="attributes.genre"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Genre</FormLabel>
+                                        <FormLabel required>Genre</FormLabel>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                                             <FormControl>
                                                 <SelectTrigger><SelectValue placeholder="Select a genre" /></SelectTrigger>
@@ -309,6 +309,7 @@ export function ProductForm({ onSubmit, onCancel, initialData, isLoading }: Prod
                             />
                         </div>
                     )}
+
                 </div>
 
                 {/* Action Buttons */}
