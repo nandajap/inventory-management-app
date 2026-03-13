@@ -19,8 +19,8 @@ const productBaseSchema = z.object({
 
    price: z.string()
         .min(1, 'Price is required')
-        .max(999999.99, 'Price is too high')
         .refine((val) => !isNaN(Number(val)), 'Must be a valid price')
+        .refine((val) => Number(val)<= 999999.99, 'Price is too high')
         .refine((val) => Number(val) > 0, 'Price must be greater than 0'),
 });
 

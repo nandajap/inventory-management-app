@@ -68,7 +68,7 @@ describe('productFormSchema', () => {
         sku: 'CLTH-001',
         price: '25.00',
         stockLevel: '50',
-        attributes: { size: 'SMALL', material: 'Cotton' } 
+        attributes: { size: 'SMALL', material: 'Cotton' }
       };
       const result = productFormSchema.safeParse(invalidClothing);
       expect(result.success).toBe(false);
@@ -128,9 +128,9 @@ describe('productFormSchema', () => {
         sku: 'BOOK-999',
         price: '45.00',
         stockLevel: '100',
-        attributes: { 
+        attributes: {
           author: 'A'.repeat(101), // Over 100 chars
-          genre: 'Science' 
+          genre: 'Science'
         }
       };
       const result = productFormSchema.safeParse(invalidBook);
@@ -140,6 +140,6 @@ describe('productFormSchema', () => {
       }
     });
   });
-  
+
 });
 
