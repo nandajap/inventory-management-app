@@ -23,6 +23,9 @@ export default defineConfig({
         'src/types/**',
         'src/mocks/**',
         '**/*.d.ts',
+        'src/components/ui/toast.tsx',
+        'src/components/ui/toaster.tsx',
+        'src/hooks/use-toast.ts'
       ],
       thresholds: {
         lines: 85,
