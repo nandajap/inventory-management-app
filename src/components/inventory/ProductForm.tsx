@@ -109,7 +109,7 @@ export function ProductForm({ onSubmit, onCancel, initialData, isLoading }: Prod
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                    {categoryItems.map(item => <SelectItem value={item.value}>{item.name}</SelectItem>)}
+                                    {categoryItems.map(item => <SelectItem key={item.value} value={item.value}>{item.name}</SelectItem>)}
                                 </SelectContent>
                             </Select>
                             <FormMessage />

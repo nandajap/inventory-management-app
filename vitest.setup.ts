@@ -1,8 +1,9 @@
 // vitest.setup.ts
 import '@testing-library/jest-dom';
-import { expect, afterEach, vi } from 'vitest';
+import { expect, afterEach, vi, beforeAll, afterAll } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import * as matchers from '@testing-library/jest-dom/matchers';
+import { server } from './src/mocks/server'
 
 expect.extend(matchers);
 
@@ -34,3 +35,13 @@ window.HTMLElement.prototype.releasePointerCapture = vi.fn();
 afterEach(() => {
   cleanup();
 });
+
+// Establish API mocking before all tests.
+beforeAll(() => server.listen())
+
+// Reset any request handlers that we may add during the tests,
+// so they don't affect other tests.
+afterEach(() => server.resetHandlers())
+
+// Clean up after the tests are finished.
+afterAll(() => server.close())
