@@ -28,7 +28,7 @@ const TestConsumer = () => {
     return (
         <div>
             <div data-testid="user">{auth.user?.name || "No User"}</div>
-            <div data-testid="loading">{auth.isLoading ? "Loading" : "Ready"}</div> 
+            <div data-testid="loading">{auth.isLoading ? "Loading" : "Ready"}</div>
             <button onClick={handleLogin}>Login</button>
             <button onClick={() => auth.logout()}>Logout</button>
         </div>
@@ -42,7 +42,7 @@ describe("AuthContext", () => {
     });
 
     it("initializes with user from localStorage", async () => {
-        const mockUser = { id: "1", name: "John Doe", role: "Admin"};
+        const mockUser = { id: "1", name: "John Doe", role: "Admin" };
         localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(mockUser));
 
         render(
@@ -58,7 +58,7 @@ describe("AuthContext", () => {
 
     it("updates state and storage on successful login", async () => {
         const mockResult = {
-            user: { id: "1", name: "Admin User",email:"admin@example.com", role: "Admin" as UserRole },
+            user: { id: "1", name: "Admin User", email: "admin@example.com", role: "Admin" as UserRole },
             tokens: { accessToken: "at", refreshToken: "rt" }
         };
         vi.mocked(authService.login).mockResolvedValue(mockResult);
@@ -143,5 +143,25 @@ describe("AuthContext", () => {
         });
 
         expect(localStorage.getItem(STORAGE_KEYS.USER)).toBeNull();
+    });
+
+    it("clears auth state even if logout API fails", async () => {
+        localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, "rt-123");
+        // 1. Mock logout to fail
+        vi.mocked(authService.logout).mockRejectedValue(new Error("API Error"));
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+
+        render(<AuthProvider><TestConsumer /></AuthProvider>);
+
+        await act(async () => {
+            screen.getByText("Logout").click();
+        });
+
+        // 2. Verify catch block 
+        expect(consoleSpy).toHaveBeenCalledWith('Logout error:', expect.anything());
+        // 3. Verify state was still cleared (Finally block)
+        expect(screen.getByTestId("user")).toHaveTextContent("No User");
+
+        consoleSpy.mockRestore();
     });
 });

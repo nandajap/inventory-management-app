@@ -17,4 +17,16 @@ describe("SideNavbar", () => {
     expect(screen.getByText("Suppliers")).toBeInTheDocument()
     expect(screen.getByText("Reports")).toBeInTheDocument()
   })
+
+  it("applies active styles when on the correct route", () => {
+    render(
+        <MemoryRouter initialEntries={["/inventory"]}>
+            <SideNavbar />
+        </MemoryRouter>
+    );
+
+    const inventoryLink = screen.getByRole("link", { name: /inventory/i });
+    // Check if it has the active class 
+    expect(inventoryLink).toHaveClass("bg-blue-50"); 
+});
 })

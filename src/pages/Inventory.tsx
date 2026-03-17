@@ -30,7 +30,7 @@ export default function Inventory() {
     const { can } = usePermissions();
     const hasAnyActions = can('product.edit') || can('product.delete');
 
-    const {toast} = useToast();
+    const { toast } = useToast();
 
 
     //Fetch Data (Server-Side Pagination)
@@ -94,13 +94,13 @@ export default function Inventory() {
         }
     });
 
-    const handleDelete = (product: Product) => {
+    const handleDelete = async (product: Product) => {
         const confirmed = window.confirm(
             `Are you sure you want to delete "${product.name}"?`
         );
         if (!confirmed) return;
         try {
-            deleteMutation.mutate(product.id);
+            deleteMutation.mutateAsync(product.id);
         } catch (error) {
             console.error('Delete failed: ', error);
             alert('Failed to delete product. Please try again.');
@@ -235,7 +235,6 @@ export default function Inventory() {
                                         {/* Edit button - Admin only */}
                                         <PermissionGuard permission='product.edit'>
                                             <button
-                                                //Edit functionality TBA later along with add form in milestone 3
                                                 onClick={() => handleEdit(product)}
                                                 className="mr-4 text-gray-600 hover:text-blue-600 font-medium transition-colors">
                                                 <Pencil className="w-5 h-5" />
