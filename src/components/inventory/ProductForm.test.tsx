@@ -71,10 +71,10 @@ describe("ProductForm Integration", () => {
 
     it("validates and submits a Book product", async () => {
         const user = userEvent.setup();
-        // 1. Ensure we start with a clean render
+        // 1. Ensure to start with a clean render
         render(<ProductForm onSubmit={mockSubmit} onCancel={mockCancel} />);
 
-        // 2. Open Category and pick Books (use fireEvent for stability)
+        // 2. Open Category and pick Books 
         const categoryTrigger = screen.getByRole("combobox", { name: /category/i });
         fireEvent.click(categoryTrigger);
         const bookOption = await screen.findByRole("option", { name: /books/i });
@@ -89,7 +89,7 @@ describe("ProductForm Integration", () => {
         // 3. Fill Book attributes
         await user.type(screen.getByLabelText(/Author/i), "J.K. Rowling");
 
-        // ADD GENRE SELECTION (This was the missing piece!)
+        // ADD GENRE SELECTION
         const genreTrigger = screen.getByRole("combobox", { name: /genre/i });
         fireEvent.click(genreTrigger);
         const genreOption = await screen.findByRole("option", { name: /^Fiction$/i });
@@ -99,9 +99,7 @@ describe("ProductForm Integration", () => {
         const submitBtn = screen.getByRole("button", { name: /submit/i });
         await user.click(submitBtn);
 
-        await waitFor(() => {
-            // Verify it was only called ONCE in this test
-            //expect(mockSubmit).toHaveBeenCalledTimes(1); 
+        await waitFor(() => {        
             expect(mockSubmit).toHaveBeenLastCalledWith(expect.objectContaining({
                 category: "books",
                 name: "Harry Potter"
@@ -132,7 +130,6 @@ describe("ProductForm Integration", () => {
         fireEvent.click(sizeOption);
 
         // 4. Select Material (Wait for it to be visible)
-        // We use findByRole here to be extra safe
         const materialTrigger = await screen.findByRole("combobox", { name: /material/i });
         fireEvent.click(materialTrigger);
         const materialOption = await screen.findByRole("option", { name: /cotton/i });

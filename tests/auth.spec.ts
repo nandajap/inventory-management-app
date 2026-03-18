@@ -2,23 +2,40 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Authentication Flow', () => {
   test('should log in successfully and show inventory', async ({ page }) => {
-    // 1. Navigate to login
+    // Navigate to login
     await page.goto('http://localhost:5173/login');
 
-    // 2. Fill credentials
+    // Fill credentials
     await page.getByLabel(/email/i).fill('admin@example.com');
     await page.getByLabel(/password/i).fill('admin123');
 
-    // 3. Click Sign In
+    // Click Sign In
     await page.getByRole('button', { name: /sign in/i }).click();
 
-    // 4. Wait for navigation to inventory
+    // Wait for navigation to inventory
     await expect(page).toHaveURL(/.*inventory/);
 
-    // 5. Verify the dashboard content is visible
+    // Verify the dashboard content is visible
     await expect(page.getByText(/Inventory Management/i)).toBeVisible();
-    
-    // 6. Verify MSW data loaded 
+
+    // Verify MSW data loaded 
     await expect(page.getByText(/MacBook Pro/i)).toBeVisible();
+
+    // Open the Add Product Modal
+    await page.getByRole('button', { name: /add product/i }).click();
+    await expect(page.getByRole("heading", { name: /add new product/i })).toBeVisible();
+
+    //Fill the form
+    await page.getByLabel(/product name/i).fill('E2E Test Laptop');
+    await page.getByLabel(/sku/i).fill('ELEC-001');
+    await page.getByLabel(/price/i).fill('1500');
+    await page.getByLabel(/stock level/i).fill('10');
+    await page.getByLabel(/brand/i).fill('Playwright Brand');
+    //Click submit button
+    await page.getByRole("button", { name: /submit/i }).click();
+    //Check for toast message and product in table
+    await expect(page.getByText('Product Created', { exact: true }).first()).toBeVisible();
+    await expect(page.getByText('E2E Test Laptop')).toBeVisible();
   });
+
 });

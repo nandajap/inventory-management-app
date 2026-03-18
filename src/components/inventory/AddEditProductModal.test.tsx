@@ -102,7 +102,13 @@ describe("AddEditProductModal", () => {
 
         // 4. Wait for success
         await waitFor(() => {
-            expect(productService.updateProduct).toHaveBeenCalled();
+            expect(productService.updateProduct).toHaveBeenCalledWith(
+                1, expect.objectContaining({
+                    name: "Updated Laptop Name", // Check that the new name was sent
+                    price: 1000,                 
+                    stockLevel: 10
+                })
+            );
             expect(mockOnClose).toHaveBeenCalled();
         }, { timeout: 3000 });
     });

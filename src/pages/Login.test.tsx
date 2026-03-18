@@ -14,7 +14,6 @@ vi.mock("react-router-dom", async () => {
 });
 
 describe("Login Page", () => {
-    // Add this to ensure every test starts from a clean slate
     beforeEach(() => {
         localStorage.clear();
         vi.clearAllMocks();
@@ -66,4 +65,28 @@ describe("Login Page", () => {
             expect(screen.queryByText(/Sign In/i)).not.toBeInTheDocument();
         });
     });
+
+    it("successful login redirects to inventory", async()=>{
+        const user = userEvent.setup();
+        render(
+            <BrowserRouter>
+                <AuthProvider>
+                    <Login />
+                </AuthProvider>
+            </BrowserRouter>
+        )
+        const emailText = screen.getByLabelText(/Email/i);
+        const pass = screen.getByLabelText(/Password/i);
+        await user.type(emailText, "admin@example.com");
+        await user.type(pass, "admin123");
+
+        const button = screen.getByRole("button", {name: /sign in/i});
+        await user.click(button);
+
+        await waitFor(()=>{
+            expect(screen.queryByLabelText(/Email/i)).not.toBeInTheDocument();
+            expect(mockNavigate).toHaveBeenCalledWith('/inventory', {replace:true});
+        });
+    
+    })
 });

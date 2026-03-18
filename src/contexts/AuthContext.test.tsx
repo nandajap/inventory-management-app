@@ -132,11 +132,9 @@ describe("AuthContext", () => {
             </AuthProvider>
         );
 
-        // We wrap the click because we expect an unhandled promise rejection in this specific UI setup
-        // But we check that storage remains empty
         await act(async () => {
             try {
-                await screen.getByText("Login").click();
+                screen.getByText("Login").click();
             } catch (e) {
                 // error caught
             }

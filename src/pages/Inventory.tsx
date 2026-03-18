@@ -236,6 +236,7 @@ export default function Inventory() {
                                         <PermissionGuard permission='product.edit'>
                                             <button
                                                 onClick={() => handleEdit(product)}
+                                                aria-label='edit button'
                                                 className="mr-4 text-gray-600 hover:text-blue-600 font-medium transition-colors">
                                                 <Pencil className="w-5 h-5" />
                                             </button>

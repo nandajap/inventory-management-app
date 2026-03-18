@@ -36,6 +36,9 @@ describe('productFormSchema', () => {
     it('fails if price is 0 or negative', () => {
       const result = productFormSchema.safeParse({ ...validElectronics, price: '0' });
       expect(result.success).toBe(false);
+      if(!result.success){
+        expect(result.error.issues[0].message).toContain('Price must be greater than 0');
+      }
     });
 
     it('fails if stockLevel is not a whole number', () => {

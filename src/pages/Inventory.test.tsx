@@ -83,7 +83,7 @@ describe("Inventory Page", () => {
                 </AuthProvider></BrowserRouter></QueryClientProvider>
             );
 
-            // 1. Find a delete button in the table (after data loads)
+            // Find a delete button in the table (after data loads)
             const deleteButtons = await screen.findAllByRole("button");
             const deleteBtn = deleteButtons.find(btn => btn.innerHTML.includes("trash")); // Finding the Trash2 icon
 
@@ -116,8 +116,8 @@ describe("Inventory Page", () => {
             </AuthProvider></BrowserRouter></QueryClientProvider>
             );
 
-            // 1. Find the 'Next' or '2' button
-            const nextButton = await screen.findByRole("button", { name: /next|2/i });
+            // 1. Find the 'Next' button
+            const nextButton = await screen.findByRole("button", { name: /next/i });
             await user.click(nextButton);
 
             // 2. Verify it triggers a fetch for the next page
@@ -125,7 +125,7 @@ describe("Inventory Page", () => {
         });
 
         it("shows empty state when no products are returned", async () => {
-            // 1. Override the MSW handler for this test ONLY
+            // 1. Override the MSW handler
             server.use(
                 http.get(`${BASE_URL}/products`, () => {
                     return HttpResponse.json({ data: [], pagination: { totalItems: 0, totalPages: 0, page: 1, pageSize: 10 } });
@@ -151,7 +151,6 @@ describe("Inventory Page", () => {
             );
 
             // 1. Find the Select by its role. 
-            // Shadcn/Radix Selects usually have the role 'combobox'
             const pageSizeSelect = await screen.findByRole("combobox");
             await user.click(pageSizeSelect);
 
@@ -176,7 +175,7 @@ describe("Inventory Page", () => {
             const editBtn = editButtons.find(btn => btn.innerHTML.includes("pencil"));
 
             if (editBtn) {
-                await user.click(editBtn); 
+                await user.click(editBtn);
                 expect(await screen.findByText(/Edit Product/i)).toBeInTheDocument();
             }
         });
@@ -189,6 +188,8 @@ describe("Inventory Page", () => {
 
             // Click once for ASC (default)
             await user.click(nameHeader);
+            expect(screen.getByText(/Loading page 1/i)).toBeInTheDocument();
+
             // Click again for DESC 
             await user.click(nameHeader);
 
@@ -283,13 +284,13 @@ describe("Inventory Page", () => {
             // 1. Wait for data to load
             await screen.findByText(/MacBook Pro/i);
 
-            // 2. Find the edit button specifically by its icon/class
+            // 2. Find the edit button specifically by its icon
             const buttons = await screen.findAllByRole("button");
             const editBtn = buttons.find(btn => btn.innerHTML.includes("pencil"));
 
             if (editBtn) {
                 await user.click(editBtn);
-                // 3. Find the heading specifically (Role: heading)
+                // 3. Find the heading specifically 
                 const modalTitle = await screen.findByRole("heading", { name: /Edit Product/i });
                 expect(modalTitle).toBeInTheDocument();
                 // 4. Verify data is pre-filled
@@ -319,29 +320,39 @@ describe("Inventory Page", () => {
                 expect(deleteSpy).not.toHaveBeenCalled();
             }
             confirmSpy.mockRestore();
+            deleteSpy.mockRestore();
         });
 
-        it("clears selection and closes modal on onClose", async () => {
+        it("clears selection when edit modal is closed so the next add modal is empty", async () => {
             const user = userEvent.setup();
+
             render(
                 <QueryClientProvider client={queryClient}><BrowserRouter><AuthProvider>
                     <Inventory />
                 </AuthProvider></BrowserRouter></QueryClientProvider>
             );
 
-            // 1. Open modal
-            const addBtn = await screen.findByRole("button", { name: /Add Product/i });
-            await user.click(addBtn);
+            await screen.findByText(/macbook pro/i);
 
-            // 2. Click cancel (triggers the onClose logic in Inventory.tsx)
-            const cancelBtn = screen.getByRole("button", { name: /cancel/i });
+            const editBtn = (await screen.findAllByRole("button")).find(btn => btn.innerHTML.includes("pencil"));
+
+            if (editBtn) {
+                await user.click(editBtn);
+                expect(await screen.findByRole("heading", {name: /Edit Product/i})).toBeInTheDocument();
+            }
+
+            const cancelBtn = screen.getByRole("button", {name:/cancel/i});
             await user.click(cancelBtn);
 
-            // This hits the logic that clears 'selectedProduct' and sets 'isModalOpen' to false
-            await waitFor(() => {
-                expect(screen.queryByText(/Add New Product/i)).not.toBeInTheDocument();
-            });
+            const addBtn = screen.getByRole("button", {name:/add product/i});
+            await user.click(addBtn);
+
+            expect(await screen.findByRole("heading", {name: /Add new Product/i})).toBeInTheDocument();
+            expect(screen.getByLabelText(/product name/i)).toHaveValue("");
+
         });
 
     })
+
+
 });

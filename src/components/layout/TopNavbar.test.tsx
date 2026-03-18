@@ -13,9 +13,9 @@ describe("TopNavbar", () => {
   const mockLogout = vi.fn()
 
   beforeEach(() => {
-    vi.clearAllMocks()
+    vi.clearAllMocks();
     // Default mock state: User is logged in
-    ;(useAuth as any).mockReturnValue({
+    (useAuth as any).mockReturnValue({
       user: { name: "Test User", role: "Admin" },
       logout: mockLogout
     })
@@ -34,7 +34,7 @@ describe("TopNavbar", () => {
   it("handles logout process correctly", () => {
     // Mock window.confirm to return true
     const confirmSpy = vi.spyOn(window, 'confirm').mockImplementation(() => true)
-    
+
     render(
       <MemoryRouter>
         <TopNavbar />
@@ -46,13 +46,13 @@ describe("TopNavbar", () => {
 
     expect(confirmSpy).toHaveBeenCalled()
     expect(mockLogout).toHaveBeenCalled()
-    
+
     confirmSpy.mockRestore()
   })
 
   it("cancels logout if user denies confirmation", () => {
     const confirmSpy = vi.spyOn(window, 'confirm').mockImplementation(() => false)
-    
+
     render(
       <MemoryRouter>
         <TopNavbar />
